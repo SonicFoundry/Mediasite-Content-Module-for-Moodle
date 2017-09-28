@@ -78,7 +78,8 @@ function mediasite_delete_instance($mediasiteId) {
 function mediasite_get_coursemodule_info($coursemodule) {
     global $DB;
 
-    if ($mediasite = $DB->get_record('mediasite', array('id'=>$coursemodule->instance), 'id, course, name, description, resourceid, resourcetype, FROM_UNIXTIME(recorddateutc) AS recorddate, recorddateutc, presenters, LENGTH(LTRIM(RTRIM(presenters))) AS presenters_length, sofotags, LENGTH(LTRIM(RTRIM(sofotags))) AS tags_length, displaymode, launchurl, siteid')) {
+    if ($mediasite = $DB->get_record('mediasite', array('id'=>$coursemodule->instance), 'id, course, name, description, resourceid, resourcetype, recorddateutc, presenters, LENGTH(LTRIM(RTRIM(presenters))) AS presenters_length, sofotags, LENGTH(LTRIM(RTRIM(sofotags))) AS tags_length, displaymode, launchurl, siteid')) {
+        $mediasite->recorddate = userdate($mediasite->recorddateutc, '%F %T');
 
         $lti = $DB->get_record('mediasite_sites', array('id' => $mediasite->siteid), $fields='*', $strictness=MUST_EXIST);
         // on upgrade, the lti consumer key must be set to allow a successful post. Only show this if the configuration is valid
