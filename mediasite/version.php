@@ -14,12 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die;
 
 $plugin->component = 'mod_mediasite';
-$plugin->version = 2017091201;
+$plugin->version = 2017111300;
 $plugin->release = 'v7.0';
-$plugin->requires = 2014051200;
+$plugin->requires = 2016052308.00;
 $plugin->maturity = MATURITY_STABLE; // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC or MATURITY_STABLE.
 $plugin->cron = 0;
 $plugin->dependencies = array();

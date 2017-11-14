@@ -15,14 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
-* <page specific comment>.
-*
-* @package       mod_mediasite
-* @subpackage    backup-moodle2
-* @author        Sonic Foundry
-* @copyright    (C) 2017 Sonic Foundry http://sonicfoundry.com
-* @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 /**
  * Define all the restore steps that will be used by the restore_mediasite_activity_task
@@ -38,7 +36,7 @@ class restore_mediasite_activity_structure_step extends restore_activity_structu
         $paths = array();
         $paths[] = new restore_path_element('mediasite', '/activity/mediasite');
 
-        // Return the paths wrapped into standard activity structure
+        // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
 
@@ -49,14 +47,14 @@ class restore_mediasite_activity_structure_step extends restore_activity_structu
         $oldid = $data->id;
         $data->course = $this->get_courseid();
 
-        // insert the mediasite record
+        // Insert the mediasite record.
         $newitemid = $DB->insert_record('mediasite', $data);
-        // immediately after inserting "activity" record, call this
+        // Immediately after inserting "activity" record, call this.
         $this->apply_activity_instance($newitemid);
     }
 
     protected function after_execute() {
-        // Add mediasite related files, no need to match by itemname (just internally handled context)
+        // Add mediasite related files, no need to match by itemname (just internally handled context).
         $this->add_related_files('mod_mediasite', 'description', null);
     }
 }

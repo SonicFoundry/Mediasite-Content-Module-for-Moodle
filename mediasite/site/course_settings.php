@@ -14,13 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+
 require_once(dirname(__FILE__) . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once("$CFG->dirroot/mod/mediasite/site/mod_course_settings_form.php");
 
 global $OUTPUT, $CFG, $PAGE, $DB;
 
-$id = required_param('id', PARAM_INT); // Course ID
+$id = required_param('id', PARAM_INT);
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 
 $context = context_course::instance($id);
@@ -39,34 +48,35 @@ $PAGE->set_heading($course->fullname);
 
 $mform  = new Sonicfoundry\mod_course_settings_form(strval($course->id));
 
-// persist the data if this is posting back
 if ($mform->get_data()) {
     $data = $mform->get_data();
     $record = new stdClass();
-    $isUpdate = $data->mediasite_course_config_id != '0';
-    if ($isUpdate) {
+    $isupdate = $data->mediasite_course_config_id != '0';
+    if ($isupdate) {
         $record->id = $data->mediasite_course_config_id;
     }
     $record->course = $data->id;
     $record->mediasite_site = $data->mediasite_site;
-    $site_show_integration_catalog = $DB->get_field('mediasite_sites', 'show_integration_catalog', array('id' => $data->mediasite_site));
-    if ($site_show_integration_catalog == 3) {
+    $siteshowintegrationcatalog = $DB->get_field(
+        'mediasite_sites',
+        'show_integration_catalog',
+        array('id' => $data->mediasite_site)
+    );
+    if ($siteshowintegrationcatalog == 3) {
         $record->mediasite_courses_enabled = 1;
-    } else if ($site_show_integration_catalog == 0) {
+    } else if ($siteshowintegrationcatalog == 0) {
         $record->mediasite_courses_enabled = 0;
     } else {
         $record->mediasite_courses_enabled = $data->mediasite_courses_enabled;
     }
 
-    if ($isUpdate) {
+    if ($isupdate) {
         $DB->update_record('mediasite_course_config', $record);
     } else {
         $DB->insert_record('mediasite_course_config', $record);
     }
     redirect(new \moodle_url('/course/view.php', array('id' => $id)));
 }
-
-
 
 echo $OUTPUT->header();
 

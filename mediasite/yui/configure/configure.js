@@ -1,13 +1,10 @@
-YUI.add('moodle-mod_mediasite-configure', function (Y, NAME) {
+YUI.add('moodle-mod_mediasite-configure', function(Y) {
 
     M.mod_mediasite = M.mod_mediasite || {};
     M.mod_mediasite.configure = {
-        init: function (formid, courseid) {
+        init: function(formid) {
             var self = this;
-            Y.on("click", function () {
-                //console.log('Add site');
-                //var addSiteUrl = M.cfg.wwwroot + '/mod/mediasite/site/add.php';
-                //window.location = addSiteUrl;
+            Y.on("click", function() {
                 var addSiteUrl = 'add.php';
                 document.location = addSiteUrl;
             }, "#id_siteaddbutton", self);

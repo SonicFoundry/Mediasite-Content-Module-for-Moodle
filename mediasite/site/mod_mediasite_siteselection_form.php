@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace Sonicfoundry;
 
 defined('MOODLE_INTERNAL') || die();
@@ -36,14 +44,40 @@ class mod_mediasite_siteselection_form extends \moodleform {
 
         $options = array();
         if (is_array($this->sitelist) && count($this->sitelist) > 0) {
-            foreach($this->sitelist as $site) {
+            foreach ($this->sitelist as $site) {
                 $options[$site->id] = $site->sitename;
             }
         }
 
         $mform->addElement('html', '<h2>'.get_string('mediasite_server_list', 'mediasite').'</h2>');
 
-        if(is_array($this->sitelist) && count($this->sitelist) > 0) {
+        $usagecount = optional_param('usage_count', 0, PARAM_INT);
+        if ($usagecount > 0) {
+            $mform->addElement(
+                'html',
+                '<div id="purge_all_caches" class="box generalbox m-b-1 adminerror alert alert-danger p-y-1">'.
+                get_string('purge_all_caches_message', 'mediasite').
+                '</div>'
+            );
+        }
+
+        $displaymbstringwarning = false;
+        try {
+            $displaymbstringwarning = !function_exists('mb_convert_encoding');
+        } catch (exception $e) {
+            $displaymbstringwarning = true;
+        }
+
+        if ($displaymbstringwarning) {
+            $mform->addElement(
+                'html',
+                '<div id="mbstring_required" class="box generalbox m-b-1 adminerror alert alert-danger p-y-1">'.
+                get_string('mbstring_required_message', 'mediasite').
+                '</div>'
+            );
+        }
+
+        if (is_array($this->sitelist) && count($this->sitelist) > 0) {
             $table = new \html_table();
             $table->head = array(get_string('sitenametblhder', 'mediasite'),
                                  get_string('siteroottblhder', 'mediasite'),
@@ -57,13 +91,23 @@ class mod_mediasite_siteselection_form extends \moodleform {
                 $cells[] = new \html_table_cell($site->show_my_mediasite ? $site->my_mediasite_title : '-');
                 $cells[] = new \html_table_cell($site->show_integration_catalog ? $site->integration_catalog_title : '-');
                 $actioncell = new \html_table_cell();
-                $confirmationmessage = ($site->usage_count > 0) ? get_string('site_deletion_inuse_confirmation', 'mediasite', $site->usage_count) : get_string('site_deletion_unused_confirmation', 'mediasite');
+                $confirmationmessage = ($site->usage_count > 0) ? get_string(
+                    'site_deletion_inuse_confirmation',
+                    'mediasite',
+                    $site->usage_count
+                ) : get_string(
+                    'site_deletion_unused_confirmation',
+                    'mediasite'
+                );
                 $actioncell->text = $OUTPUT->action_icon(new \moodle_url('/mod/mediasite/site/edit.php',
                             array('site' => $site->id, 'section' => 'modmediasite')),
                         new \pix_icon('t/editstring', get_string('actionedit', 'mediasite')))
                     ." ".
-                    $OUTPUT->action_icon(new \moodle_url('/mod/mediasite/site/delete.php', array('site' => $site->id, 'section' => 'modmediasite')),
-                                         new \pix_icon('t/delete', get_string('actiondelete', 'mediasite')),
+                    $OUTPUT->action_icon(new \moodle_url('/mod/mediasite/site/delete.php', array(
+                        'site' => $site->id,
+                        'section' => 'modmediasite',
+                        'usage_count' => $site->usage_count)
+                        ), new \pix_icon('t/delete', get_string('actiondelete', 'mediasite')),
                                          null,
                                          array('onclick' => 'return confirm("'.$confirmationmessage.'");'));
                 $cells[] = $actioncell;
@@ -79,10 +123,6 @@ class mod_mediasite_siteselection_form extends \moodleform {
                                                                         'type' => 'button',
                                                                         'id' => 'id_siteaddbutton',
                                                                         'name' => 'siteaddbutton')));
-
-//        $mform->addElement('html', $OUTPUT->action_icon(new \moodle_url('/mod/mediasite/site/add.php'),
-//            new \pix_icon('t/add', 'Add a site')));
-        //$mform->addElement('button', 'siteaddbutton', \get_string('siteaddbuttonlabel', 'mediasite'));
 
         $mform->addElement('header', 'mediasite_server_defaults', get_string('mediasite_server_defaults', 'mediasite'));
 
@@ -106,11 +146,14 @@ class mod_mediasite_siteselection_form extends \moodleform {
 
         $config = $DB->get_record('mediasite_config', array());
         if (!$config && is_array($this->sitelist) && count($this->sitelist) > 0) {
-            echo \html_writer::tag('div', '* To complete the plugin configuration you must save the options below', array('class' => 'sofo-configuration-notice'));
+            echo \html_writer::tag(
+                'div',
+                '* To complete the plugin configuration you must save the options below',
+                array('class' => 'sofo-configuration-notice')
+            );
         }
 
         $mform->addElement('advcheckbox', 'openaspopup', \get_string('openaspopup', 'mediasite') );
-        //$mform->addHelpButton('openaspopup', 'openaspopup', 'mediasite');
         if ($config) {
             $mform->setDefault('openaspopup', $config->openaspopup);
         } else {
@@ -119,7 +162,7 @@ class mod_mediasite_siteselection_form extends \moodleform {
 
         $mform->closeHeaderBefore('mediasite_server_defaults');
 
-        $this->add_action_buttons(TRUE, get_string('savechangebutton', 'mediasite'));
+        $this->add_action_buttons(true, get_string('savechangebutton', 'mediasite'));
     }
 
     public function validation($data, $files) {

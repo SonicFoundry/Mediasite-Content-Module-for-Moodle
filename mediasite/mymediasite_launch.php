@@ -14,12 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 require_once("../../config.php");
 require_once($CFG->dirroot.'/mod/mediasite/basiclti_locallib.php');
 require_once($CFG->dirroot.'/mod/mediasite/basiclti_mediasite_lib.php');
 
-$id = optional_param('id', 1, PARAM_INT); // Course ID
-$siteid = required_param('siteid', PARAM_INT); // Site ID
+$id = optional_param('id', 1, PARAM_INT);
+$siteid = required_param('siteid', PARAM_INT);
 
 if ($id && $id > 0) {
     if (! $course = $DB->get_record("course", array("id" => $id))) {
@@ -29,4 +37,4 @@ if ($id && $id > 0) {
 
 require_login($course);
 
-basiclti_mediasite_view($course, $siteid, mediasite_endpoint::LTI_MY_MEDIASITE);
+mediasite_basiclti_mediasite_view($course, $siteid, mediasite_endpoint::LTI_MY_MEDIASITE);

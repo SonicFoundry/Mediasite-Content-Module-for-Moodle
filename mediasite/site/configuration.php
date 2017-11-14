@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+
 require_once(dirname(__FILE__) . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/mod/mediasite/lib.php');
@@ -39,13 +48,12 @@ $sites = $DB->get_records_sql($sql);
 $siteselectionform = new Sonicfoundry\mod_mediasite_siteselection_form($sites);
 $mform =& $siteselectionform;
 if ($mform->is_cancelled()) {
-    // Go home
     redirect($CFG->wwwroot);
 }
 $data = $mform->get_data();
-if($data) {
+if ($data) {
     $record = new stdClass();
-    if(!isset($data->sites) || is_null($data->sites)) {
+    if (!isset($data->sites) || is_null($data->sites)) {
         $sites = $DB->get_records('mediasite_sites', null, '', "id");
         if (!is_null($sites) && count($sites) > 0) {
             $record->siteid = reset($sites)->id;
@@ -55,13 +63,12 @@ if($data) {
     }
     $record->openaspopup = $data->openaspopup;
     $ids = $DB->get_records('mediasite_config', null, '', "id");
-    if(!is_null($ids) && count($ids) > 0) {
+    if (!is_null($ids) && count($ids) > 0) {
         $record->id = reset($ids)->id;
         $DB->update_record('mediasite_config', $record);
     } else {
         $DB->insert_record('mediasite_config', $record);
     }
-    // Go home
     redirect($CFG->wwwroot);
 }
 

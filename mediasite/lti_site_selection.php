@@ -15,9 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * lti_site_selection.php
- * This page is automatically brought up upon loading mod_form.php. It can be brought up
- * again using the 'Search' button on mod_form.php
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(dirname(__FILE__) . '/../../config.php');
@@ -28,7 +30,7 @@ require_once("$CFG->dirroot/mod/mediasite/exceptions.php");
 
 global $CFG, $PAGE, $DB;
 
-$courseid = required_param('course', PARAM_INT);          // course
+$courseid = required_param('course', PARAM_INT);
 
 $context = context_course::instance($courseid);
 
@@ -42,23 +44,24 @@ date_default_timezone_set('UTC');
 
 $configtable = 'mediasite_course_config';
 
-$default_site_id = $DB->get_field($configtable, 'mediasite_site', array('course' => $courseid), IGNORE_MISSING);
+$defaultsiteid = $DB->get_field($configtable, 'mediasite_site', array('course' => $courseid), IGNORE_MISSING);
 
 $mform  = new mod_mediasite_lti_site_selection_form(strval($courseid));
 
-if (!$default_site_id) {
+if (!$defaultsiteid) {
 
     $data = $mform->get_data();
 
-    if($data) {
-        // save the defaults
+    if ($data) {
         $record = new stdclass();
         $record->course = $courseid;
         $record->mediasite_site = $data->siteid;
-        $record->mediasite_courses_enabled = $DB->get_field('mediasite_sites', 'show_integration_catalog', array('id' => $data->siteid));
+        $record->mediasite_courses_enabled = $DB->get_field(
+            'mediasite_sites',
+            'show_integration_catalog',
+            array('id' => $data->siteid));
         $DB->insert_record($configtable, $record);
 
-        // launch the site
         $mform->launchredirect($courseid, $data->siteid);
     }
 
@@ -68,7 +71,7 @@ if (!$default_site_id) {
 
     html_footer();
 } else {
-    $mform->launchredirect($courseid, $default_site_id);
+    $mform->launchredirect($courseid, $defaultsiteid);
 }
 
 function html_header() {
@@ -76,7 +79,8 @@ function html_header() {
 
     echo $OUTPUT->header();
 
-    echo "<table class=\"yui3-skin-sam\" border=\"0\" style=\"margin-left:auto;margin-right:auto\" cellspacing=\"3\" cellpadding=\"3\" width=\"640\">";
+    echo "<table class=\"yui3-skin-sam\" border=\"0\" style=\"margin-left:auto;margin-right:auto\" ";
+    echo "cellspacing=\"3\" cellpadding=\"3\" width=\"640\">";
     echo "<tr>";
     echo "<td colspan=\"2\">";
 }

@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+
 defined('MOODLE_INTERNAL') || die();
 
 $string['actiondelete'] = 'Delete existing site';
@@ -64,6 +73,8 @@ $string['lti_debug_launch'] = "Show LTI Debug Information";
 $string['lti_debug_launch_postfix'] = "<i>(Not recommended for use in production)</i>";
 $string['lti_embed_type_catalog_required'] = 'Please select at least one Catalog embedding format.';
 $string['lti_embed_type_presentation_required'] = 'Please select at least one Presentation embedding format.';
+$string['mbstring_required_message'] = 'Moodle is not configured correctly for Mediasite Content. The multibyte string PHP extension (mbstring) is required.';
+$string['mbstring_required_embed_message'] = 'Moodle is not configured correctly for Mediasite Content. Not all content may be displayed. Please contact your administrator.';
 $string['mediasite'] = "Mediasite";
 $string['mediasite:addinstance'] = "Add Mediasite content to a course";
 $string['mediasite:courses7'] = "Use Mediasite Courses";
@@ -115,6 +126,7 @@ $string['presentation_abstract_plus_player'] = 'Abstract + Player';
 $string['PresentationLink'] = 'Link Only';
 $string['presenters'] = 'Presenters';
 $string['press_to_submit'] = 'Press to launch this activity';
+$string['purge_all_caches_message'] = 'Mediasite Content in courses may be partially visible in courses for a brief time. Use Site administration > Development > Purge all caches to fix course content immediately.';
 $string['requiredsitelti_consumer_key'] = "An LTI Consumer Key is required.";
 $string['requiredsitelti_consumer_secret'] = "An LTI Consumer Secret is required.";
 $string['requiredsitename'] = 'Site Name is required';

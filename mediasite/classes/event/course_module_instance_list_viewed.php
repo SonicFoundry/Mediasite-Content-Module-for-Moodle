@@ -14,9 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+
 namespace mod_mediasite\event;
 defined('MOODLE_INTERNAL') || die();
 
 class course_module_instance_list_viewed extends \core\event\course_module_instance_list_viewed {
-    // parent class handles all.
 }

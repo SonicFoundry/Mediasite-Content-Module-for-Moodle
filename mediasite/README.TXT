@@ -1,14 +1,13 @@
 ==================================================
-Mediasite Activity Module for Moodle 2.7+
+Mediasite Activity Module for Moodle 3.3+
 ==================================================
 
- The Mediasite Activity Module for Moodle 2.7+ integrates Mediasite content into Moodle.
+ The Mediasite Activity Module for Moodle 3.3+ integrates Mediasite content into Moodle.
 
  This module has been tested for:
 
-    - Moodle 2.9.x through 3.2.x
+    - Moodle 3.1.8, 3.2.5, and 3.3.2
     - Mediasite EVP Server 7.0.30
-    - Upgrades from Moodle versions 2.9.x
     - Upgrades from Mediasite Activity Module versions 2017030500
     - Backup/Restore functionality
 
@@ -19,7 +18,8 @@ Requirements
 ============
 
     - Mediasite Mediasite EVP Server 7.0.28 or later.
-	- Moodle 2.9 or later.
+    - Moodle 3.1.8 or later.
+    - PHP extension mbstring
 
 ==========
 Overview

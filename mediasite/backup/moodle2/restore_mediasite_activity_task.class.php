@@ -15,42 +15,37 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
-* <page specific comment>.
-*
-* @package       mod_mediasite
-* @subpackage    backup-moodle2
-* @author        Sonic Foundry
-* @copyright    (C) 2017 Sonic Foundry http://sonicfoundry.com
-* @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once ($CFG->dirroot . '/mod/mediasite/backup/moodle2/restore_mediasite_stepslib.php');
+require_once($CFG->dirroot . '/mod/mediasite/backup/moodle2/restore_mediasite_stepslib.php');
 
 /**
  * mediasite restore task that provides all the settings and steps to perform one
  * complete restore of the activity
  */
 class restore_mediasite_activity_task extends restore_activity_task {
-    
     /**
      * Define (add) particular settings this activity can have
      */
     protected function define_my_settings() {
-        //no particular settings for this activity
+        // No particular settings for this activity.
     }
-    
     /**
      * Define (add) particular steps this activity can have
      */
     protected function define_my_steps() {
-        //mediasite only has one structure step
+        // Mediasite only has one structure step.
         $this->add_step(new restore_mediasite_activity_structure_step('mediasite_structure', 'mediasite.xml'));
     }
-    
     /**
-     * Define the contents in the activity that must be 
+     * Define the contents in the activity that must be
      * processed by the link decoder
      */
     static public function define_decode_contents() {
@@ -58,21 +53,17 @@ class restore_mediasite_activity_task extends restore_activity_task {
         $contents[] = new restore_decode_content('mediasite', array('description'), 'mediasite');
         return $contents;
     }
-    
     /**
      * Define the decoding rules for links belonging
      * to the activity to be executed by the link decoder
      */
-    static public function define_decode_rules(){
+    static public function define_decode_rules() {
         $rules = array();
-        
         $rules[] = new restore_decode_rule('MEDIASITEVIEWBYID', '/mod/mediasite/view.php?id=$1', 'course_module');
-        $rules[] = new restore_decode_rule('MEDIASITEINDEX', '/mod/mediasite/index.php?id=$1', 'course');   
-        
+        $rules[] = new restore_decode_rule('MEDIASITEINDEX', '/mod/mediasite/index.php?id=$1', 'course');
         return $rules;
     }
-    
-   /**
+    /**
      * Define the restore log rules that will be applied
      * by the {@link restore_logs_processor} when restoring
      * mediasite logs. It must return one array

@@ -15,30 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
-* <page specific comment>.
-*
-* @package       mod_mediasite
-* @subpackage    backup-moodle2
-* @author        Sonic Foundry
-* @copyright    (C) 2017 Sonic Foundry http://sonicfoundry.com
-* @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/mediasite/backup/moodle2/backup_mediasite_stepslib.php');
- 
 /**
  * mediasite backup task that provides all the settings and steps to perform one
  * complete backup of the activity
  */
 class backup_mediasite_activity_task extends backup_activity_task {
- 
     /**
      * Define (add) particular settings this activity can have
      */
     protected function define_my_settings() {
-        // No particular settings for this activity
+        // No particular settings for this activity.
     }
 
     /**
@@ -47,24 +43,19 @@ class backup_mediasite_activity_task extends backup_activity_task {
     protected function define_my_steps() {
         $this->add_step(new backup_mediasite_activity_structure_step('mediasite_structure', 'mediasite.xml'));
     }
- 
     /**
      * Code the transformations to perform in the activity in
      * order to get transportable (encoded) links
      */
     static public function encode_content_links($content) {
         global $CFG;
-        
-        $base = preg_quote($CFG->wwwroot,"/");
-        
-        //Link to the list of mediasites
+        $base = preg_quote($CFG->wwwroot, "/");
+        // Link to the list of mediasites.
         $search = "/(" . $base . "\/mod\/mediasite\/index.php\?id\=)([0-9]+)/";
         $content = preg_replace($search, '$@MEDIASITEINDEX*$2@$', $content);
-        
-        //Link to mediasite view by moduleid
+        // Link to mediasite view by moduleid.
         $search = "/(" . $base . "\/mod\/mediasite\/view.php\?id\=)([0-9]+)/";
         $content = preg_replace($search, '$@MEDIASITEVIEWBYID*$2@$', $content);
-        
         return $content;
     }
 }

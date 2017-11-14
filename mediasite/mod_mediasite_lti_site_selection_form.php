@@ -15,16 +15,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * lti_site_selection.php
+ * Mediasite plugin for Moodle.
  *
- * Select the Mediasite to be used to search against. If only one site is defined, proceed to it with no user intervention
- *
- * @author David Kalsbeek
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__) . '/../../config.php');
 require_once("$CFG->dirroot/lib/formslib.php");
 require_once("$CFG->dirroot/mod/mediasite/locallib.php");
 
@@ -35,12 +34,12 @@ require_once("$CFG->dirroot/mod/mediasite/locallib.php");
  */
 class mod_mediasite_lti_site_selection_form extends moodleform {
     private $cid;
-    function __construct($cid) {
+    public function __construct($cid) {
         $this->cid = $cid;
         parent::__construct(null, null, 'post', '', null, true);
     }
-    
-    function definition() {
+
+    public function definition() {
         global $DB;
 
         $mform =& $this->_form;
@@ -52,27 +51,30 @@ class mod_mediasite_lti_site_selection_form extends moodleform {
 
         if (count($records) == 1) {
             foreach ($records as $record) {
-                // redirect to the launch page
                 $this->launchredirect($this->cid, $record->id);
             }
         }
-        
+
         if (count($records) > 1 && has_capability('mod/mediasite:overridedefaults', $context)) {
             $sitenames = array();
             foreach ($records as $record) {
                 $sitenames[$record->id] = $record->sitename;
             }
-            $selectdropdown = $mform->addElement('select', 'siteid', get_string('sitenames', 'mediasite'), $sitenames, array('id' => 'id_siteid'));
+            $selectdropdown = $mform->addElement(
+                'select',
+                'siteid',
+                get_string('sitenames', 'mediasite'),
+                $sitenames,
+                array('id' => 'id_siteid')
+            );
             $selectdropdown->setSelected($defaults->siteid);
         } else {
             $mform->addElement('hidden', 'siteid', $defaults->siteid, array('id' => 'id_siteid'));
             $mform->setType('siteid', PARAM_INT);
             $mform->setDefault('siteid', $defaults->siteid);
         }
-        
-        $mform->closeHeaderBefore('submitbutton');
 
-        // $this->add_action_buttons(true, get_string('launchsite', 'mediasite'));
+        $mform->closeHeaderBefore('submitbutton');
 
         $mform->addElement('submit', 'launchsite', get_string('launchsite', 'mediasite'));
 
@@ -83,12 +85,12 @@ class mod_mediasite_lti_site_selection_form extends moodleform {
 
     }
 
-    function validation($data, $files) {
+    public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         return $errors;
     }
 
-    function launchredirect($courseid, $siteid) {
+    public function launchredirect($courseid, $siteid) {
         redirect("basiclti_launch.php?course=".$courseid."&siteid=".$siteid);
     }
 

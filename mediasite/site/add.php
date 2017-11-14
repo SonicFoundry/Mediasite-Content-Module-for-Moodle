@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+
 require_once(dirname(__FILE__) . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once("mod_mediasite_site_form.php");
@@ -39,12 +48,12 @@ if ($mform->is_cancelled()) {
     redirect("configuration.php");
 }
 $data = $mform->get_data();
-if($data) {
+if ($data) {
     $navinstalled = $mform->is_navigation_installed();
     $record = new stdClass();
     $url = $data->siteurl;
     $record->sitename = $data->sitename;
-    if(!preg_match('%\bhttps?:\/\/%si',$data->siteurl)) {
+    if (!preg_match('%\bhttps?:\/\/%si', $data->siteurl)) {
         $data->siteurl = 'http://'.$data->siteurl;
     }
     $record->endpoint = $data->siteurl;
@@ -61,7 +70,6 @@ if($data) {
         $record->openaspopup_my_mediasite = $data->openaspopup_my_mediasite;
     }
     $record->lti_debug_launch = $data->lti_debug_launch;
-    // embed_formats is a bitmask
     $record->embed_formats = $data->lti_embed_type_thumbnail;
     $record->embed_formats |= $data->lti_embed_type_abstract_only;
     $record->embed_formats |= $data->lti_embed_type_abstract_plus_player;
@@ -69,10 +77,8 @@ if($data) {
     $record->embed_formats |= $data->lti_embed_type_embed;
     $record->embed_formats |= $data->lti_embed_type_presentation_link;
     $record->embed_formats |= $data->lti_embed_type_player_only;
-    // Add new record
     $siteid = $DB->insert_record('mediasite_sites', $record);
 
-    // Go home
     redirect("configuration.php");
 }
 

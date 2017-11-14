@@ -14,17 +14,30 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot.'/mod/mediasite/basiclti_mediasite_lib.php');
 
-function mediasite_extend_navigation_user_settings(navigation_node $parentnode, stdClass $user, context_user $context, stdClass $course, context_course $coursecontext) {
+function mediasite_extend_navigation_user_settings(
+    navigation_node $parentnode,
+    stdClass $user,
+    context_user $context,
+    stdClass $course,
+    context_course $coursecontext) {
 }
 
 function mediasite_navigation_extension_mymediasite() {
     global $PAGE;
     debugging('mediasite_navigation_extension_mymediasite');
-    $mediasitenode = $PAGE->navigation->add(get_string('mediasite', 'mediasite'), null, navigation_node::TYPE_COURSE);    
+    $mediasitenode = $PAGE->navigation->add(get_string('mediasite', 'mediasite'), null, navigation_node::TYPE_COURSE);
     $url = new moodle_url('/mod/mediasite/mymediasite.php');
     $mymediasitenode = $mediasitenode->add(get_string('my_mediasite', 'mediasite'), $url);
     $mymediasitenode->make_active();
@@ -32,8 +45,8 @@ function mediasite_navigation_extension_mymediasite() {
 }
 
 function mediasite_extend_navigation_course_settings(navigation_node $parentnode, context_course $context) {
-    $OVERRIDE_CAPABILITY = 'mod/mediasite:overridedefaults';
-    if (!has_capability($OVERRIDE_CAPABILITY, $context)) {
+    $overridecapability = 'mod/mediasite:overridedefaults';
+    if (!has_capability($overridecapability, $context)) {
         return;
     }
     global $PAGE;
@@ -41,7 +54,12 @@ function mediasite_extend_navigation_course_settings(navigation_node $parentnode
     $key = 'mediasite_course_settings';
     $coursesettings = $parentnode->get($key);
     if ($coursesettings == null && $PAGE->course->id > 1) {
-        $coursesettings = $parentnode->add($label, new moodle_url('/mod/mediasite/site/course_settings.php', array('id' => $PAGE->course->id)), navigation_node::TYPE_SETTING, null, $key, new pix_icon('i/settings', $label));
+        $coursesettings = $parentnode->add(
+            $label,
+            new moodle_url(
+                '/mod/mediasite/site/course_settings.php',
+                array('id' => $PAGE->course->id)
+            ), navigation_node::TYPE_SETTING, null, $key, new pix_icon('i/settings', $label));
     }
     return $coursesettings;
 }
@@ -57,23 +75,21 @@ function mediasite_navigation_extension_mymediasite_placement() {
         return;
     }
 
-    $SITE_PAGES_ID = 1;
-    $id = optional_param('id', $SITE_PAGES_ID, PARAM_INT);
+    $sitepagesid = 1;
+    $id = optional_param('id', $sitepagesid, PARAM_INT);
     if (($PAGE->course != null)) {
-        // BUG44083:    MOODLE: Naviagation error in Moodle if MyMediasite clicked while viewing media
-        // debugging('using $PAGE->course->id ('.$PAGE->course->id.') instead of $id ('.$id.').');
+        // BUG44083:    MOODLE: Naviagation error in Moodle if MyMediasite clicked while viewing media.
         $id = $PAGE->course->id;
     }
-    $MY_MEDIASITE_CAPABILITY = 'mod/mediasite:mymediasite';
+    $mymediasitecapability = 'mod/mediasite:mymediasite';
     $mymediasiteplacements = get_mediasite_sites(false, true);
-    // $sitepagesnode = $PAGE->navigation->find($SITE_PAGES_ID, navigation_node::TYPE_COURSE);
     $sitepagesnode = $PAGE->navigation->get('home');
     $coursenode = null;
     $coursecontext = null;
     $coursemediasitesite = null;
     $usercontext = context_user::instance($USER->id);
 
-    if ($PAGE->course != null && $PAGE->course->id != $SITE_PAGES_ID) {
+    if ($PAGE->course != null && $PAGE->course->id != $sitepagesid) {
         $coursecontext = context_course::instance($PAGE->course->id);
         $coursenode = $PAGE->navigation->find($PAGE->course->id, navigation_node::TYPE_COURSE);
         $coursemediasitesite = $DB->get_field('mediasite_course_config', 'mediasite_site', array('course' => $PAGE->course->id));
@@ -82,16 +98,12 @@ function mediasite_navigation_extension_mymediasite_placement() {
     $showboostdivider = true;
 
     foreach ($mymediasiteplacements as $site) {
-        $url = new moodle_url('/mod/mediasite/mymediasite.php', array('id' => $id, 'siteid'=>$site->id));
-        // debugging('mediasite_navigation_extension_mymediasite_placement: ' . $site->my_mediasite_placement . ' title: ' . $site->my_mediasite_title);
+        $url = new moodle_url('/mod/mediasite/mymediasite.php', array('id' => $id, 'siteid' => $site->id));
         switch ($site->my_mediasite_placement) {
             case mediasite_menu_placement::SITE_PAGES:
-                // debugging('SITE_PAGES $site->id: '.$site->id.' : $site->my_mediasite_title: '.$site->my_mediasite_title.' : has_capability($MY_MEDIASITE_CAPABILITY, $usercontext): '.has_capability($MY_MEDIASITE_CAPABILITY, $usercontext));
-                if (has_capability($MY_MEDIASITE_CAPABILITY, $usercontext)) {
-                    // debugging('show my mediasite is_boost_navigation_available = ' . is_boost_navigation_available());
+                if (has_capability($mymediasitecapability, $usercontext)) {
                     $sitepagesnode->add($site->my_mediasite_title, $url);
                     if (is_boost_navigation_available()) {
-                        // add to Boost Navigation
                         add_to_boost_navigation($site->my_mediasite_title, $url, $usercontext, $showboostdivider);
                         $showboostdivider = false;
                     }
@@ -105,27 +117,20 @@ function mediasite_navigation_extension_mymediasite_placement() {
                     if (is_null($coursenode) || $coursenode == null) {
                         debugging('coursenode is null');
                     }
-                    // if (is_null($coursemediasitesite) || $coursemediasitesite == null) {
-                    //     debugging('coursemediasitesite is null');
-                    // }
-                    // if (!($coursenode == $site->id)) {
-                    //     debugging('wrong site id coursenode = ' . $coursenode . ', site->id = ' . $site->id);
-                    // }
-                    if (!has_capability($MY_MEDIASITE_CAPABILITY, $coursecontext)) {
+                    if (!has_capability($mymediasitecapability, $coursecontext)) {
                         debugging('missing MyMediasite capability');
                     }
                 }
-                if ($coursecontext != null && $coursenode != null && has_capability($MY_MEDIASITE_CAPABILITY, $coursecontext)) {
-                    // debugging('course menu placement');
+                if ($coursecontext != null && $coursenode != null && has_capability($mymediasitecapability, $coursecontext)) {
                     $coursenode->add($site->my_mediasite_title, $url);
                 }
                 if (is_boost_navigation_available()) {
-                    // debugging('course menu boost placement');
                     add_to_boost_navigation($site->my_mediasite_title, $url, $usercontext, $showboostdivider);
                 }
                 break;
             default:
-                debugging('The value for my_mediasite_placement in mediasite_navigation_extension_mymediasite_placement is not valid. The value was '.$site->get_my_mediasite_placement().'.');
+                debugging('The value for my_mediasite_placement in mediasite_navigation_extension_mymediasite_placement'.
+                    ' is not valid. The value was '.$site->get_my_mediasite_placement().'.');
         }
     }
 }
@@ -134,75 +139,57 @@ function is_boost_navigation_available() {
     global $PAGE, $CFG;
     $reason = 'All tests passed.';
     $result = true;
-    // debugging('pagetype: ' . $PAGE->pagetype);
     try {
         if (!isLoggedIn()) {
             $reason = 'is_boost_navigation_available found you are not logged in';
             $result = false;
-        }
-        else if ($CFG->version < 2016120500) {
+        } else if ($CFG->version < 2016120500) {
             $reason = 'is_boost_navigation_available  detected this is pre-3.2.';
             $result = false;
-        }
-        else if (is_null($PAGE)) {
+        } else if (is_null($PAGE)) {
             $reason = 'is_boost_navigation_available $PAGE is null';
             $result = false;
-        }
-        else if (starts_with($PAGE->pagetype, 'admin-')) {
+        } else if (starts_with($PAGE->pagetype, 'admin-')) {
             // On admin pages the $PAGE object acts weird, don't add Mediasite to admin pages.
             $reason = 'is_boost_navigation_available pagetype contains admin: ' . $PAGE->pagetype;
             $result = false;
-        }
-        else if (starts_with($PAGE->pagetype, 'grade-report-')) {
+        } else if (starts_with($PAGE->pagetype, 'grade-report-')) {
             // On admin pages the $PAGE object acts weird, don't add Mediasite to admin pages.
             $reason = 'is_boost_navigation_available pagetype contains grade-report: ' . $PAGE->pagetype;
             $result = false;
-        }
-        else if ($PAGE->pagetype == 'course-view-topics') {
+        } else if ($PAGE->pagetype == 'course-view-topics') {
             $reason = 'is_boost_navigation_available COURSE VIEW TOPICS';
             $result = false;
-        }
-        else if ($PAGE->pagetype == 'course-user') {
+        } else if ($PAGE->pagetype == 'course-user') {
             $reason = 'is_boost_navigation_available COURSE USER';
             $result = false;
-        }
-        else if ($PAGE->pagetype == 'notes-index') {
+        } else if ($PAGE->pagetype == 'notes-index') {
             $reason = 'is_boost_navigation_available NOTES INDEX';
             $result = false;
-        }
-        // else if (!property_exists($PAGE, 'settingsnav')) {
-        //     $reason = 'is_boost_navigation_available SETTINGSNAV is not defined';
-        //     $result = false;
-        // }
-        else if (is_null($PAGE->settingsnav)) {
+        } else if (!property_exists('moodle_page', 'settingsnav') || is_null($PAGE->settingsnav)) {
             $reason = 'is_boost_navigation_available SETTINGSNAV is null';
             $result = false;
-        }
-        else if (is_null($PAGE->navigation)) {
+        } else if (is_null($PAGE->navigation)) {
             $reason = 'is_boost_navigation_available NAVIGATION is null';
             $result = false;
-        }
-        else if (is_null($PAGE->flatnav)) {
+        } else if (is_null($PAGE->flatnav)) {
             $reason = 'is_boost_navigation_available FLATNAV is null';
             $result = false;
         }
     } catch (Exception $e) {
         $reason = $e->getMessage();
     }
-    if (!$result) {
-        // debugging('is_boost_navigation_available: ' . $result . ' -- ' . $reason);
-    }
+
     return $result;
 }
 
-function add_to_boost_navigation($linkText, $url, $context, $showboostdivider) {
+function add_to_boost_navigation($linktext, $url, $context, $showboostdivider) {
     global $PAGE;
-    // debugging('adding to boost: ' . $linkText);
     try {
-        $dashboard = navigation_node::create($linkText, $url);
+        $dashboard = navigation_node::create($linktext, $url);
         $flat = new flat_navigation_node($dashboard, 0);
         $flat->set_showdivider($showboostdivider);
-        $flat->key = rand(1000,9999);
+        $flat->key = rand(1000, 9999);
         $PAGE->flatnav->add($flat);
         $templatecontext['flatnavigation'] = $PAGE->flatnav;
     } catch (Exception $e) {
@@ -216,14 +203,13 @@ function starts_with($haystack, $needle) {
 }
 
 function mediasite_navigation_extension_courses7_course() {
-    
+
     global $PAGE, $DB;
     $course = $PAGE->course;
 
     if ($course && $course->id > 1) {
         $context = context_course::instance($course->id);
         if (!has_capability('mod/mediasite:courses7', $context)) {
-            // blowup('user does not have mediasite:courses7 capability');
             return;
         }
 
@@ -232,24 +218,20 @@ function mediasite_navigation_extension_courses7_course() {
         try {
             $courseconfig = $DB->get_record('mediasite_course_config', array('course' => $course->id), '*', MUST_EXIST);
 
-            // debugging('is_numeric:'.is_numeric($courseconfig->mediasite_courses_enabled).' $courseconfig->mediasite_courses_enabled: '.$courseconfig->mediasite_courses_enabled.' $courseconfig->mediasite_courses_enabled > 1: "'.($courseconfig->mediasite_courses_enabled > 1).'" is_bool($courseconfig->mediasite_courses_enabled > 1): '.is_bool($courseconfig->mediasite_courses_enabled > 1));
-            // debugging('$courseconfig :: ' . is_null($courseconfig) . ' :: ' . isset($courseconfig));
-
             if ($courseconfig->mediasite_courses_enabled) {
                 $site = new Sonicfoundry\MediasiteSite($courseconfig->mediasite_site);
-                // debugging('mediasite_navigation_extension_courses7_course: (2) adding ' . $site->get_integration_catalog_title());
-                $url = new moodle_url('/mod/mediasite/courses7.php', array('id'=>$course->id, 'siteid'=>$courseconfig->mediasite_site));
+                $url = new moodle_url(
+                    '/mod/mediasite/courses7.php',
+                    array('id' => $course->id, 'siteid' => $courseconfig->mediasite_site)
+                );
                 $coursesnode = $coursenode->add($site->get_integration_catalog_title(), $url);
                 if (is_boost_navigation_available()) {
                     add_to_boost_navigation($site->get_integration_catalog_title(), $url, $context, false);
                 }
-            } else {
-                // debugging('mediasite_navigation_extension_courses7_course: (3) not adding course nav');
             }
         } catch (Exception $e) {
             foreach (get_mediasite_sites(true, false) as $site) {
-                // debugging('mediasite_navigation_extension_courses7_course: (1) adding ' . $site->integration_catalog_title);
-                $url = new moodle_url('/mod/mediasite/courses7.php', array('id'=>$course->id, 'siteid'=>$site->id));
+                $url = new moodle_url('/mod/mediasite/courses7.php', array('id' => $course->id, 'siteid' => $site->id));
                 $coursesnode = $coursenode->add($site->integration_catalog_title, $url);
                 if (is_boost_navigation_available()) {
                     add_to_boost_navigation($site->integration_catalog_title, $url, $context, false);
@@ -259,14 +241,13 @@ function mediasite_navigation_extension_courses7_course() {
     }
 }
 
-function get_mediasite_sites($onlyintegrationcatalogenabled = false, $onlymymediasiteenabled = false){
+function get_mediasite_sites($onlyintegrationcatalogenabled = false, $onlymymediasiteenabled = false) {
     global $DB;
     $select = '';
     $sort = '';
     if ($onlyintegrationcatalogenabled && $onlymymediasiteenabled) {
         $select = 'show_integration_catalog > 1 AND show_my_mediasite = 1';
-    }
-    else if ($onlyintegrationcatalogenabled) {
+    } else if ($onlyintegrationcatalogenabled) {
         $select = 'show_integration_catalog > 1';
         $sort = 'integration_catalog_title';
     } else if ($onlymymediasiteenabled) {
@@ -277,6 +258,5 @@ function get_mediasite_sites($onlyintegrationcatalogenabled = false, $onlymymedi
 }
 
 function blowup($msg) {
-    //throw new moodle_exception('generalexceptionmessage', 'error', '', $msg);    
     debugging($msg);
 }

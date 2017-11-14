@@ -14,17 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once("../../config.php");
 require_once("$CFG->dirroot/mod/mediasite/lib.php");
 
 $inpopup  = optional_param('inpopup', 0, PARAM_BOOL);
-$id = required_param('id', PARAM_INT);   // course    
+$id = required_param('id', PARAM_INT);
 global $DB, $OUTPUT, $PAGE;
 
 if (! ($course = $DB->get_record("course", array ("id" => $id)))) {
-    error("Course ID is incorrect");
+    print_error("Course ID is incorrect");
 }
 
 $context = context_course::instance($course->id);
@@ -32,7 +40,6 @@ require_login($course->id);
 
 require_once("$CFG->dirroot/mod/mediasite/navigation.php");
 
-//  add_to_log($course->id, "mediasite", "view all", "index.php?id=$course->id", "");
 $event = \mod_mediasite\event\course_module_instance_list_viewed::create(array(
     'context' => $context
 ));
@@ -49,7 +56,6 @@ $PAGE->set_heading("");
 $PAGE->set_cacheable(true);
 $PAGE->set_button("");
 echo $OUTPUT->header();
-// print_header_simple("$strmediasites", "", $navigation, "", "", true, "", navmenu($course));
 
 if (! $mediasites = get_all_instances_in_course("mediasite", $course)) {
     notice("There are no mediasites", "../../course/view.php?id=$course->id");
@@ -80,15 +86,14 @@ foreach ($mediasites as $mediasite) {
         $extra = "";
     }
     if (!$mediasite->visible) {
-        //Show dimmed if the mod is hidden
-        $link = "<a class=\"dimmed\" $extra href=\"view.php?id=$mediasite->coursemodule\">".format_string($mediasite->name,true)."</a>";
+        $link = "<a class=\"dimmed\" $extra href=\"view.php?id=$mediasite->coursemodule\">".
+        format_string($mediasite->name, true)."</a>";
     } else {
-        //Show normal if the mod is visible
-        $link = "<a foo='bar' $extra href=\"view.php?id=$mediasite->coursemodule\">".format_string($mediasite->name,true)."</a>";
+        $link = "<a foo='bar' $extra href=\"view.php?id=$mediasite->coursemodule\">".
+        format_string($mediasite->name, true)."</a>";
     }
 
     if ($course->format == "weeks" or $course->format == "topics") {
-        #$table->data[] = array ($mediasite->section, $link);
         $cell1 = new html_table_cell($mediasite->section);
         $cell2 = new html_table_cell($link);
         $row = new html_table_row();

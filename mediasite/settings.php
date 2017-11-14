@@ -14,26 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-require_once(dirname(__FILE__) . '/../../config.php');
-require_once("$CFG->dirroot/mod/mediasite/lib.php");
-require_once("$CFG->dirroot/mod/mediasite/locallib.php");
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
 $modsettingmediasiteurl = new moodle_url('/mod/mediasite/site/configuration.php?section=modmediasite');
 
-if (strpos(strtolower($_SERVER["REQUEST_URI"]), 'mediasite/site/configuration.php')
-    || strpos(strtolower($_SERVER["REQUEST_URI"]), 'mediasite/site/add.php')
-    || strpos(strtolower($_SERVER["REQUEST_URI"]), 'mediasite/site/edit.php')) {
-
+if (!$ADMIN->fulltree) {
     $settings = new admin_externalpage('activitysettingmediasite',
         get_string('pluginname', 'mediasite'),
         $modsettingmediasiteurl,
-        'mod/mediasite:addinstance');
-
+        'mod/mediasite:addinstance'
+    );
 } else {
-    $settings->add(new admin_setting_heading('name', get_string('admin_settings_header', 'mediasite'), get_string('admin_settings_body', 'mediasite', $CFG->wwwroot.'/mod/mediasite/site/configuration.php?section=modmediasite').'<script type="text/javascript">window.location.href="'.$modsettingmediasiteurl.'";</script>'));
-    // redirect($modsettingmediasiteurl);
+    $settings->add(new admin_setting_heading(
+        'name',
+        get_string('admin_settings_header', 'mediasite'),
+        get_string(
+            'admin_settings_body',
+            'mediasite',
+            $CFG->wwwroot.'/mod/mediasite/site/configuration.php?section=modmediasite').
+            '<script type="text/javascript">window.location.href="'.$modsettingmediasiteurl.'";</script>'
+        )
+    );
 }
-
-

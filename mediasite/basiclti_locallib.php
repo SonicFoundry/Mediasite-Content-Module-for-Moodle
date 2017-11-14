@@ -1,5 +1,5 @@
 <?php
-// This file is part of BasicLTI4Moodle
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -8,42 +8,20 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
-//
-// BasicLTI4Moodle is an IMS BasicLTI (Basic Learning Tools for Interoperability)
-// consumer for Moodle 1.9 and Moodle 2.0. BasicLTI is a IMS Standard that allows web
-// based learning tools to be easily integrated in LMS as native ones. The IMS BasicLTI
-// specification is part of the IMS standard Common Cartridge 1.1 Sakai and other main LMS
-// are already supporting or going to support BasicLTI. This project Implements the consumer
-// for Moodle. Moodle is a Free Open source Learning Management System by Martin Dougiamas.
-// BasicLTI4Moodle is a project iniciated and leaded by Ludo(Marc Alier) and Jordi Piguillem
-// at the GESSI research group at UPC.
-// SimpleLTI consumer for Moodle is an implementation of the early specification of LTI
-// by Charles Severance (Dr Chuck) htp://dr-chuck.com , developed by Jordi Piguillem in a
-// Google Summer of Code 2008 project co-mentored by Charles Severance and Marc Alier.
-//
-// BasicLTI4Moodle is copyright 2009 by Marc Alier Forment, Jordi Piguillem and Nikolas Galanis
-// of the Universitat Politecnica de Catalunya http://www.upc.edu
-// Contact info: Marc Alier Forment granludo @ gmail.com or marc.alier @ upc.edu
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains the library of functions and constants for the basiclti module
+ * Mediasite plugin for Moodle.
  *
- * @package basiclti
- * @copyright 2009 Marc Alier, Jordi Piguillem, Nikolas Galanis
- *  marc.alier@upc.edu
- * @copyright 2009 Universitat Politecnica de Catalunya http://www.upc.edu
- *
- * @author Marc Alier
- * @author Jordi Piguillem
- * @author Nikolas Galanis
- *
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -56,7 +34,7 @@ require_once($CFG->dirroot.'/lib/simplepie/library/SimplePie/Misc.php');
  *
  * $param int $basicltiid       Basic LTI activity id
  */
-function basiclti_view($instance, $siteid, $typeconfig, $endpoint, $arrayofenrollments = null) {
+function mediasite_basiclti_view($instance, $siteid, $typeconfig, $endpoint, $arrayofenrollments = null) {
     global $PAGE, $CFG;
 
     $key = $typeconfig->lti_consumer_key;
@@ -66,27 +44,27 @@ function basiclti_view($instance, $siteid, $typeconfig, $endpoint, $arrayofenrol
     $instance->preferheight = 600;
 
     $course = $PAGE->course;
-    $requestparams = basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollments);
+    $requestparams = mediasite_basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollments);
 
-    // Make sure we let the tool know what LMS they are being called from
+    // Make sure we let the tool know what LMS they are being called from.
     $requestparams["ext_lms"] = "moodle-2";
 
-    // Add oauth_callback to be compliant with the 1.0A spec
+    // Add oauth_callback to be compliant with the 1.0A spec.
     $requestparams["oauth_callback"] = "about:blank";
 
     $submittext = get_string('press_to_submit', 'mediasite');
-    $parms = sign_parameters($requestparams, $endpoint, "POST", $key, $secret, $submittext, $orgid /*, $orgdesc*/);
+    $parms = mediasite_sign_parameters($requestparams, $endpoint, "POST", $key, $secret, $submittext, $orgid);
 
     $debuglaunch = ( $instance->debuglaunch == 1 );
     if ( true ) {
-        // TODO: Need frame height
+        // TODO: Need frame height.
         $height = $instance->preferheight;
         if ((!$height) || ($height == 0)) {
             $height = 400;
         }
-        $content = post_launch_html($parms, $endpoint, $debuglaunch, $height);
+        $content = mediasite_post_launch_html($parms, $endpoint, $debuglaunch, $height);
     } else {
-        $content = post_launch_html($parms, $endpoint, $debuglaunch, false);
+        $content = mediasite_post_launch_html($parms, $endpoint, $debuglaunch, false);
     }
     print $content;
 }
@@ -100,12 +78,11 @@ function basiclti_view($instance, $siteid, $typeconfig, $endpoint, $arrayofenrol
  *
  * @return array    $request        Request details
  */
-function basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollments) {
+function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollments) {
     global $USER, $CFG;
 
     $context = context_system::instance();
-    // $role = basiclti_get_ims_role($USER, $context);
-    $role = copyof_lti_get_ims_role($USER, null, $course->id, false);
+    $role = mediasite_copyof_lti_get_ims_role($USER, null, $course->id, false);
 
     $locale = $course->lang;
     if ( strlen($locale) < 1 ) {
@@ -148,20 +125,18 @@ function basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollm
 
     // Concatenate the custom parameters from the administrator and the instructor
     // Instructor parameters are only taken into consideration if the administrator
-    // has giver permission
+    // has giver permission.
     $customstr = $typeconfig->lti_custom_parameters;
-    // $instructorcustomstr = $instance->instructorcustomparameters;
     $custom = array();
-    // $instructorcustom = array();
     if ($customstr) {
-        $custom = split_custom_parameters($customstr);
+        $custom = mediasite_split_custom_parameters($customstr);
     }
     $requestparams = array_merge($custom, $requestparams);
 
     // The LTI app will look for the following specific custom_mediasite_integration_* attributes
-    // in the LTI POST and configure the LTI Search app accordingly
+    // in the LTI POST and configure the LTI Search app accordingly.
     $mediasiteintegration = array();
-    $mediasiteintegration['custom_mediasite_integration_callback'] = get_current_url();
+    $mediasiteintegration['custom_mediasite_integration_callback'] = mediasite_get_current_url();
 
     $mediasiteembedformats = array();
     $site = new Sonicfoundry\MediasiteSite($typeconfig);
@@ -175,7 +150,7 @@ function basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollm
     $mediasiteintegration['ext_content_return_url'] = $typeconfig->id;
 
     // Similar to what the Mediasite Building Block for Blackboard and Canvas ext_roles, include
-    // all the enrollment information for this user
+    // all the enrollment information for this user.
     if ($arrayofenrollments != null) {
         $mediasiteintegration['custom_mediasite_roles'] = implode(',', $arrayofenrollments);
     }
@@ -191,7 +166,7 @@ function basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollm
  *
  * @return Array of custom parameters
  */
-function split_custom_parameters($customstr) {
+function mediasite_split_custom_parameters($customstr) {
     $lines = preg_split("/[\n;]/", $customstr);
     $retval = array();
     foreach ($lines as $line) {
@@ -200,8 +175,8 @@ function split_custom_parameters($customstr) {
             continue;
         }
         $key = trim(core_text::substr($line, 0, $pos));
-        $val = trim(core_text::substr($line, $pos+1));
-        $key = map_keyname($key);
+        $val = trim(core_text::substr($line, $pos + 1));
+        $key = mediasite_map_keyname($key);
         $retval['custom_'.$key] = $val;
     }
     return $retval;
@@ -214,7 +189,7 @@ function split_custom_parameters($customstr) {
  *
  * @return string       Processed name
  */
-function map_keyname($key) {
+function mediasite_map_keyname($key) {
     $newkey = "";
     $key = core_text::strtolower(trim($key));
     foreach (str_split($key) as $ch) {
@@ -239,7 +214,7 @@ function map_keyname($key) {
  * @return string                 IMS Role
  *
  */
-function basiclti_get_ims_role($user, $context) {
+function mediasite_basiclti_get_ims_role($user, $context) {
 
     $roles = get_user_roles($context, $user->id);
     $rolesname = array();
@@ -265,83 +240,11 @@ function basiclti_get_ims_role($user, $context) {
  *
  * @return array        Tool Configuration
  */
-function basiclti_get_type_config($siteid) {
+function mediasite_basiclti_get_type_config($siteid) {
     global $DB;
 
     $config = $DB->get_record('mediasite_sites', array('id' => $siteid), $fields = '*', $strictness = MUST_EXIST);
     return $config;
-}
-
-/**
- * Returns all tool instances with a typeid of 0 that
- * marks them as unconfigured. These tools usually proceed from a
- * backup - restore process.
- *
- */
-function basiclti_get_unconfigured_tools() {
-    global $DB;
-
-    return $DB->get_records('basiclti', array('typeid' => 0));
-}
-
-/**
- * Returns all basicLTI tools configured by the administrator
- *
- */
-function basiclti_filter_get_types() {
-    global $DB;
-
-    return $DB->get_records('basiclti_types');
-}
-
-/**
- * Prints the various configured tool types
- *
- */
-function basiclti_filter_print_types() {
-    global $CFG;
-
-    $types = basiclti_filter_get_types();
-    if (!empty($types)) {
-        echo '<ul>';
-        foreach ($types as $type) {
-            echo '<li>'.
-            $type->name.
-            '<span class="commands">'.
-            '<a class="editing_update" href="typessettings.php?action=update&amp;id='.$type->id.'&amp;sesskey='.sesskey().'" title="Update">'.
-            '<img class="iconsmall" alt="Update" src="'.$CFG->wwwroot.'/pix/t/edit.gif"/>'.
-            '</a>'.
-            '<a class="editing_delete" href="typessettings.php?action=delete&amp;id='.$type->id.'&amp;sesskey='.sesskey().'" title="Delete">'.
-            '<img class="iconsmall" alt="Delete" src="'.$CFG->wwwroot.'/pix/t/delete.gif"/>'.
-            '</a>'.
-            '</span>'.
-            '</li>';
-
-        }
-        echo '</ul>';
-    } else {
-        echo '<div class="message">';
-        echo get_string('notypes', 'mediasite');
-        echo '</div>';
-    }
-}
-
-/**
- * Delete a Basic LTI configuration
- *
- * @param int $id   Configuration id
- */
-function basiclti_delete_type($id) {
-    global $DB;
-
-    $instances = $DB->get_records('basiclti', array('typeid' => $id));
-    foreach ($instances as $instance) {
-        $instance->typeid = 0;
-        $DB->update_record('basiclti', $instance);
-    }
-
-    $DB->delete_records('basiclti_types', array('id' => $id));
-    $DB->delete_records('basiclti_types_config', array('typeid' => $id));
 }
 
 /**
@@ -351,10 +254,10 @@ function basiclti_delete_type($id) {
  *
  * @return array Basic LTI configuration details
  */
-function basiclti_get_config($bltiobject) {
+function mediasite_basiclti_get_config($bltiobject) {
     $typeconfig = array();
     $typeconfig = (array)$bltiobject;
-    $additionalconfig = basiclti_get_type_config($bltiobject->typeid);
+    $additionalconfig = mediasite_basiclti_get_type_config($bltiobject->typeid);
     $typeconfig = array_merge($typeconfig, $additionalconfig);
     return $typeconfig;
 }
@@ -368,11 +271,11 @@ function basiclti_get_config($bltiobject) {
  * @return Instance configuration
  *
  */
-function basiclti_get_type_config_from_instance($id) {
+function mediasite_basiclti_get_type_config_from_instance($id) {
     global $DB;
 
     $instance = $DB->get_record('basiclti', array('id' => $id));
-    $config = basiclti_get_config($instance);
+    $config = mediasite_basiclti_get_config($instance);
 
     $type = new stdClass();
     $type->lti_fix = $id;
@@ -404,172 +307,6 @@ function basiclti_get_type_config_from_instance($id) {
 }
 
 /**
- * Generates some of the tool configuration based on the admin configuration details
- *
- * @param int $id
- *
- * @return Configuration details
- */
-function basiclti_get_type_type_config($id) {
-    global $DB;
-
-    $basicltitype = $DB->get_record('basiclti_types', array('id' => $id));
-    $config = basiclti_get_type_config($id);
-
-    $type->lti_typename = $basicltitype->name;
-    if (isset($config['toolurl'])) {
-        $type->lti_toolurl = $config['toolurl'];
-    }
-    if (isset($config['resourcekey'])) {
-        $type->lti_resourcekey = $config['resourcekey'];
-    }
-    if (isset($config['password'])) {
-        $type->lti_password = $config['password'];
-    }
-    if (isset($config['preferheight'])) {
-        $type->lti_preferheight = $config['preferheight'];
-    }
-    if (isset($config['sendname'])) {
-        $type->lti_sendname = $config['sendname'];
-    }
-    if (isset($config['instructorchoicesendname'])) {
-        $type->lti_instructorchoicesendname = $config['instructorchoicesendname'];
-    }
-    if (isset($config['sendemailaddr'])) {
-        $type->lti_sendemailaddr = $config['sendemailaddr'];
-    }
-    if (isset($config['instructorchoicesendemailaddr'])) {
-        $type->lti_instructorchoicesendemailaddr = $config['instructorchoicesendemailaddr'];
-    }
-    if (isset($config['acceptgrades'])) {
-        $type->lti_acceptgrades = $config['acceptgrades'];
-    }
-    if (isset($config['instructorchoiceacceptgrades'])) {
-        $type->lti_instructorchoiceacceptgrades = $config['instructorchoiceacceptgrades'];
-    }
-    if (isset($config['allowroster'])) {
-        $type->lti_allowroster = $config['allowroster'];
-    }
-    if (isset($config['instructorchoiceallowroster'])) {
-        $type->lti_instructorchoiceallowroster = $config['instructorchoiceallowroster'];
-    }
-    if (isset($config['allowsetting'])) {
-        $type->lti_allowsetting = $config['allowsetting'];
-    }
-    if (isset($config['instructorchoiceallowsetting'])) {
-        $type->lti_instructorchoiceallowsetting = $config['instructorchoiceallowsetting'];
-    }
-    if (isset($config['customparameters'])) {
-        $type->lti_customparameters = $config['customparameters'];
-    }
-    if (isset($config['allowinstructorcustom'])) {
-        $type->lti_allowinstructorcustom = $config['allowinstructorcustom'];
-    }
-    if (isset($config['organizationid'])) {
-        $type->lti_organizationid = $config['organizationid'];
-    }
-    if (isset($config['organizationurl'])) {
-        $type->lti_organizationurl = $config['organizationurl'];
-    }
-    if (isset($config['organizationdescr'])) {
-        $type->lti_organizationdescr = $config['organizationdescr'];
-    }
-    if (isset($config['launchinpopup'])) {
-        $type->lti_launchinpopup = $config['launchinpopup'];
-    }
-    if (isset($config['debuglaunch'])) {
-        $type->lti_debuglaunch = $config['debuglaunch'];
-    }
-    if (isset($config['moodle_course_field'])) {
-            $type->lti_moodle_course_field = $config['moodle_course_field'];
-    }
-    if (isset($config['module_class_type'])) {
-            $type->lti_module_class_type = $config['module_class_type'];
-    }
-
-    return $type;
-}
-
-/**
- * Add a tool configuration in the database
- *
- * @param $config   Tool configuration
- *
- * @return int Record id number
- */
-function basiclti_add_config($config) {
-    global $DB;
-
-    return $DB->insert_record('basiclti_types_config', $config);
-}
-
-/**
- * Updates a tool configuration in the database
- *
- * @param $config   Tool configuration
- *
- * @return Record id number
- */
-function basiclti_update_config($config) {
-    global $DB;
-
-    $return = true;
-    if ($old = $DB->get_record('basiclti_types_config', array('typeid' => $config->typeid, 'name' => $config->name))) {
-        $config->id = $old->id;
-        $return = $DB->update_record('basiclti_types_config', $config);
-    } else {
-        $return = $DB->insert_record('basiclti_types_config', $config);
-    }
-    return $return;
-}
-
-/**
- * Prints the screen that handles misconfigured objects due to
- * an incomplete backup - restore process
- *
- * @param int $id ID of the misconfigured tool
- *
- */
-function basiclti_fix_misconfigured_choice($id) {
-    global $CFG, $USER, $OUTPUT;
-
-    echo $OUTPUT->box_start('generalbox');
-    echo '<div>';
-    $types = basiclti_filter_get_types();
-    if (!empty($types)) {
-        echo '<h4 class="main">'.get_string('fixexistingconf', 'mediasite').'</h4></br>';
-        echo '<form action='.$CFG->wwwroot.'/mod/basiclti/typessettings.php?action=fix&amp;sesskey='.$USER->sesskey.' method="post">';
-
-        foreach ($types as $type) {
-            echo '<input type="radio" name="useexisting" value="'.$type->id.'" />'.$type->name.'<br />';
-        }
-        echo '<input type="hidden" name="id" value="'.$id.'"/>';
-        echo '<br />';
-        echo '<div class="message"><input type="submit" value="'.get_string('fixold', 'mediasite').'"></div>';
-        echo '</form>';
-    } else {
-        echo '<div class="message">';
-        echo get_string('notypes', 'mediasite');
-        echo '</div>';
-    }
-    echo '</div>';
-    echo $OUTPUT->box_end();
-
-    echo $OUTPUT->box_start("generalbox");
-    echo '<div>';
-    echo '<h4 class="main">'.get_string('fixnewconf', 'mediasite').'</h4></br>';
-    echo '<form action='.$CFG->wwwroot.'/mod/basiclti/typessettings.php?action=fix&amp;sesskey='.$USER->sesskey.' method="post">';
-    echo '<input type="hidden" name="id" value="'.$id.'"/>';
-    echo '<input type="hidden" name="definenew" value="1"/>';
-    echo '<div class="message"><input type="submit" value="'.get_string('fixnew', 'mediasite').'"></div>';
-    echo '</form>';
-    echo '</div>';
-    echo $OUTPUT->box_end();
-
-}
-
-
-/**
  * Signs the petition to launch the external tool using OAuth
  *
  * @param $oldparms     Parameters to be passed for signing
@@ -581,7 +318,7 @@ function basiclti_fix_misconfigured_choice($id) {
  * @param $orgid       LMS name
  * @param $orgdesc     LMS key
  */
-function sign_parameters($oldparms, $endpoint, $method, $oauthconsumerkey, $oauthconsumersecret, $submittext, $orgid /*, $orgdesc*/) {
+function mediasite_sign_parameters($oldparms, $endpoint, $method, $oauthconsumerkey, $oauthconsumersecret, $submittext, $orgid) {
     global $lastbasestring;
     $parms = $oldparms;
     $parms["lti_version"] = "LTI-1p0";
@@ -589,20 +326,17 @@ function sign_parameters($oldparms, $endpoint, $method, $oauthconsumerkey, $oaut
     if ( $orgid ) {
         $parms["tool_consumer_instance_guid"] = $orgid;
     }
-    /* Suppress this for now - Chuck
-    if ( $orgdesc ) $parms["tool_consumer_instance_description"] = $orgdesc;
-    */
     $parms["ext_submit"] = $submittext;
 
     $testtoken = '';
 
-    $hmacmethod = new OAuthSignatureMethod_HMAC_SHA1();
-    $testconsumer = new OAuthConsumer($oauthconsumerkey, $oauthconsumersecret, null);
+    $hmacmethod = new MediasiteOAuthSignatureMethod_HMAC_SHA1();
+    $testconsumer = new MediasiteOAuthConsumer($oauthconsumerkey, $oauthconsumersecret, null);
 
-    $accreq = OAuthRequest::from_consumer_and_token($testconsumer, $testtoken, $method, $endpoint, $parms);
+    $accreq = MediasiteOAuthRequest::from_consumer_and_token($testconsumer, $testtoken, $method, $endpoint, $parms);
     $accreq->sign_request($hmacmethod, $testconsumer, $testtoken);
 
-    // Pass this back up "out of band" for debugging
+    // Pass this back up "out of band" for debugging.
     $lastbasestring = $accreq->get_signature_base_string();
 
     $newparms = $accreq->get_parameters();
@@ -617,16 +351,18 @@ function sign_parameters($oldparms, $endpoint, $method, $oauthconsumerkey, $oaut
  * @param $endpoint     URL of the external tool
  * @param $debug        Debug (true/false)
  */
-function post_launch_html($newparms, $endpoint, $debug=false, $height=false) {
+function mediasite_post_launch_html($newparms, $endpoint, $debug=false, $height=false) {
     global $lastbasestring;
     if ($height) {
-        $r = "<form action=\"".$endpoint."\" name=\"ltiLaunchForm\" id=\"ltiLaunchForm\" method=\"post\" encType=\"application/x-www-form-urlencoded\">\n";
+        $r = "<form action=\"".$endpoint.
+            "\" name=\"ltiLaunchForm\" id=\"ltiLaunchForm\" method=\"post\" encType=\"application/x-www-form-urlencoded\">\n";
     } else {
-        $r = "<form action=\"".$endpoint."\" name=\"ltiLaunchForm\" id=\"ltiLaunchForm\" method=\"post\" encType=\"application/x-www-form-urlencoded\">\n";
+        $r = "<form action=\"".$endpoint.
+            "\" name=\"ltiLaunchForm\" id=\"ltiLaunchForm\" method=\"post\" encType=\"application/x-www-form-urlencoded\">\n";
     }
     $submittext = $newparms['ext_submit'];
 
-    // Contruct html for the launch parameters
+    // Contruct html for the launch parameters.
     foreach ($newparms as $key => $value) {
         $key = htmlspecialchars($key);
         $value = htmlspecialchars($value);
@@ -646,7 +382,7 @@ function post_launch_html($newparms, $endpoint, $debug=false, $height=false) {
         $r .= "  //<![CDATA[ \n";
         $r .= "function basicltiDebugToggle() {\n";
         $r .= "    var ele = document.getElementById(\"basicltiDebug\");\n";
-        $r .= "    if(ele.style.display == \"block\") {\n";
+        $r .= "    if (ele.style.display == \"block\") {\n";
         $r .= "        ele.style.display = \"none\";\n";
         $r .= "    }\n";
         $r .= "    else {\n";
@@ -690,45 +426,7 @@ function post_launch_html($newparms, $endpoint, $debug=false, $height=false) {
     return $r;
 }
 
-/**
- * Returns a link with info about the state of the basiclti submissions
- *
- * This is used by view_header to put this link at the top right of the page.
- * For teachers it gives the number of submitted assignments with a link
- * For students it gives the time of their submission.
- * This will be suitable for most assignment types.
- *
- * @global object
- * @global object
- * @param bool $allgroup print all groups info if user can access all groups, suitable for index.php
- * @return string
- */
-function submittedlink($cm, $allgroups=false) {
-    global $CFG;
-
-    $submitted = '';
-    $urlbase = "{$CFG->wwwroot}/mod/basiclti/";
-
-    $context = context_module::instance($cm->id);
-    if (has_capability('mod/basiclti:grade', $context)) {
-        if ($allgroups and has_capability('moodle/site:accessallgroups', $context)) {
-            $group = 0;
-        } else {
-            $group = groups_get_activity_group($cm);
-        }
-
-        $submitted = '<a href="'.$urlbase.'submissions.php?id='.$cm->id.'">'.
-                     get_string('viewsubmissions', 'mediasite').'</a>';
-    } else {
-        if (isloggedin()) {
-            // TODO Insert code for students if needed
-        }
-    }
-
-    return $submitted;
-}
-
-function copyof_lti_get_ims_role($user, $cmid, $courseid, $islti2) {
+function mediasite_copyof_lti_get_ims_role($user, $cmid, $courseid, $islti2) {
     $roles = array();
 
     if (empty($cmid)) {
@@ -763,22 +461,24 @@ function copyof_lti_get_ims_role($user, $cmid, $courseid, $islti2) {
     return join(',', $roles);
 }
 
-function get_current_url() {
+function mediasite_get_current_url() {
 
-  $protocol = 'http';
-  if ($_SERVER['SERVER_PORT'] == 443 || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')) {
-    $protocol .= 's';
-    $protocolport = $_SERVER['SERVER_PORT'];
-  } else {
-    $protocolport = 80;
-  }
+    $protocol = 'http';
+    if ($_SERVER['SERVER_PORT'] == 443 || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')) {
+        $protocol .= 's';
+        $protocolport = $_SERVER['SERVER_PORT'];
+    } else {
+        $protocolport = 80;
+    }
 
-  $host = $_SERVER['HTTP_HOST'];
-  $port = $_SERVER['SERVER_PORT'];
-  $request = $_SERVER['PHP_SELF'];
-  $query = isset($_SERVER['argv']) ? substr($_SERVER['argv'][0], strpos($_SERVER['argv'][0], ';') + 1) : '';
+    $host = $_SERVER['HTTP_HOST'];
+    $port = $_SERVER['SERVER_PORT'];
+    $request = $_SERVER['PHP_SELF'];
+    $query = isset($_SERVER['argv']) ? substr($_SERVER['argv'][0], strpos($_SERVER['argv'][0], ';') + 1) : '';
 
-  $toret = $protocol . '://' . $host . ($port == $protocolport ? '' : ':' . $port) . $request . (empty($query) ? '' : '?' . $query);
+    $toret = $protocol . '://' . $host .
+        ($port == $protocolport ? '' : ':' . $port) .
+        $request . (empty($query) ? '' : '?' . $query);
 
-  return $toret;
+    return $toret;
 }

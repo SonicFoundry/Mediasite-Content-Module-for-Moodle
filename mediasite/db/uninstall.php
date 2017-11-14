@@ -14,11 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// Allows you to execute a PHP code before the plugin's database tables and data are dropped during the plugin uninstallation.
-require_once(dirname(__FILE__) . '/../../../config.php');
-require_once("$CFG->dirroot/mod/mediasite/locallib.php");
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 defined('MOODLE_INTERNAL') || die();
+
+require_once("$CFG->dirroot/mod/mediasite/locallib.php");
 
 /**
  * This is called at the beginning of the uninstallation process to give the module
@@ -27,10 +33,9 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool true if success
  */
 function xmldb_mediasite_uninstall() {
-    // figure out if the local plugin is installed, it must be removed first
-    $localinstalled = is_local_mediasite_courses_installed();
+    $localinstalled = mediasite_is_local_mediasite_courses_installed();
     if ($localinstalled) {
         print_error(get_string('error_local_plugin_still_installed', 'mediasite'));
     }
-    return !is_local_mediasite_courses_installed();
+    return !$localinstalled;
 }

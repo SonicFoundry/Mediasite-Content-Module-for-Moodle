@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package local_mediasite_courses
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die;
 
 require_once(dirname(__FILE__) . '/../../config.php');
@@ -30,7 +38,7 @@ function local_mediasite_courses_extend_navigation(global_navigation $nav) {
     // This callback was introduced in 2.0 as nicehack_extends_navigation(global_navigation $nav)
     // In 2.3 support was added for local_nicehack_extends_navigation(global_navigation $nav).
     // In 2.9 the name was corrected to local_nicehack_extend_navigation() for consistency
-    
+
     // debugging('local_mediasite_courses_extend_navigation');
     mediasite_navigation_extension_mymediasite_placement();
     mediasite_navigation_extension_courses7_course();

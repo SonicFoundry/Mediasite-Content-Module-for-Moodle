@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace Sonicfoundry;
 
 defined('MOODLE_INTERNAL') || die();
@@ -24,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 class MediasiteResource {
     public function __construct($record) {
-        if($record instanceof \stdClass) {
+        if ($record instanceof \stdClass) {
             $this->id = $record->id;
             $this->course = $record->course;
             $this->name = $record->name;
@@ -55,4 +63,4 @@ class MediasiteResource {
     public $displaymode;
     public $launchurl;
     public $siteid;
-} 
+}

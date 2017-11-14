@@ -1,4 +1,4 @@
-<?php 
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,14 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
-* <page specific comment>.
-*
-* @package       mod_mediasite
-* @subpackage    backup-moodle2
-* @author        Sonic Foundry
-* @copyright    (C) 2017 Sonic Foundry http://sonicfoundry.com
-* @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ * Mediasite plugin for Moodle.
+ *
+ * @package mod_mediasite
+ * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 /**
  * Define all the backup steps that will be used by the backup_mediasite_activity_task
@@ -33,29 +31,33 @@ defined('MOODLE_INTERNAL') || die();
  * Define the complete mediasite structure for backup, with file and id annotations
  */
 class backup_mediasite_activity_structure_step extends backup_activity_structure_step {
-    
     protected function define_structure() {
-        
-         // To know if we are including userinfo
+         // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
-        
-        //Define each element separated
-        $mediasite = new backup_nested_element('mediasite', array(id), array(
-            'id','course','name','description','resourceid','resourcetype','openaspopup','siteid','recorddateutc','presenters','sofotags','displaymode','launchurl'
+        // Define each element separated.
+        $mediasite = new backup_nested_element('mediasite', array('id'), array(
+            'id',
+            'course',
+            'name',
+            'description',
+            'resourceid',
+            'resourcetype',
+            'openaspopup',
+            'siteid',
+            'recorddateutc',
+            'presenters',
+            'sofotags',
+            'displaymode',
+            'launchurl'
         ));
-        
-        // Build the tree
-        
-        // Define sources
-        $mediasite->set_source_table('mediasite', array('id'=>backup::VAR_ACTIVITYID));
-        
+        // Build the tree.
+        // Define sources.
+        $mediasite->set_source_table('mediasite', array('id' => backup::VAR_ACTIVITYID));
         // Define id annotations
-        // None
-        
-        // Define file annotations
+        // None.
+        // Define file annotations.
         $mediasite->annotate_files('mod_mediasite', 'description', null);
-        
-        // Return the root element(mediasite), wrapped into standard activity structure
+        // Return the root element(mediasite), wrapped into standard activity structure.
         return $this->prepare_activity_structure($mediasite);
-    }  
+    }
 }
