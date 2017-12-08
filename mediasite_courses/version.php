@@ -23,7 +23,7 @@
  */
 
 $plugin->component = 'local_mediasite_courses';
-$plugin->version = 2017111300;
+$plugin->version = 2017120702;
 $plugin->release = 'v7.0';
 $plugin->requires = 2016052308.00;
 $plugin->maturity = MATURITY_STABLE; // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC or MATURITY_STABLE.
