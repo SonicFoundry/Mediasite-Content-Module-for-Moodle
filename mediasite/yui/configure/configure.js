@@ -2,7 +2,7 @@ YUI.add('moodle-mod_mediasite-configure', function(Y) {
 
     M.mod_mediasite = M.mod_mediasite || {};
     M.mod_mediasite.configure = {
-        init: function(formid) {
+        init: function() {
             var self = this;
             Y.on("click", function() {
                 var addSiteUrl = 'add.php';

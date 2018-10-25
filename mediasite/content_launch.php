@@ -36,30 +36,49 @@ $a        = optional_param('a', 0, PARAM_INT);
 $frameset = optional_param('frameset', '', PARAM_ALPHA);
 $inpopup  = optional_param('inpopup', 0, PARAM_BOOL);
 $coverplay = optional_param('coverplay', 0, PARAM_BOOL);
-
-if ($id) {
-    if (! ($cm = $DB->get_record("course_modules", array("id" => $id)))) {
-        print_error(get_string('error_course_module_id_incorrect', 'mediasite'));
-    }
-}
-
-if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
-    print_error(get_string('error_course_misconfigured', 'mediasite'));
-}
-
-if (! ($mediasite = $DB->get_record("mediasite", array("id" => $cm->instance)))) {
-    print_error(get_string('error_course_module_incorrect', 'mediasite'));
-} else {
-    if (! ($course = $DB->get_record("course", array("id" => $mediasite->course)))) {
-        print_error(get_string('error_course_misconfigured', 'mediasite'));
-    }
-    if (! ($cm = get_coursemodule_from_instance("mediasite", $mediasite->id, $course->id))) {
-        print_error(get_string('error_course_module_id_incorrect', 'mediasite'));
-    }
-}
-
-require_login($course);
+$resourceid = optional_param('resourceid', '', PARAM_ALPHANUMEXT);
+$courseid = optional_param('course', 0, PARAM_INT);
+$siteid   = optional_param('siteid', 0, PARAM_INT);
 
 $endpoint = $coverplay ? mediasite_endpoint::LTI_COVERPLAY : mediasite_endpoint::LTI_LAUNCH;
 
-mediasite_basiclti_mediasite_view($course, $mediasite->siteid, $endpoint, $mediasite->resourceid);
+if ($resourceid != '') {
+    if ($courseid > 0) {
+        $course = $DB->get_record("course", array("id" => $courseid));
+        require_login($course);
+        mediasite_basiclti_mediasite_view($course, $siteid, $endpoint, $resourceid);
+    } else {
+        print_error(get_string('error_course_misconfigured', 'mediasite'));
+    }
+} else {
+    if ($id > 0) {
+        if (! ($cm = $DB->get_record("course_modules", array("id" => $id)))) {
+            print_error(get_string('error_course_module_id_incorrect', 'mediasite'));
+        }
+    }
+
+    if (! $course = $DB->get_record("course", array("id" => $cm->course))) {
+        print_error(get_string('error_course_misconfigured', 'mediasite'));
+    }
+
+    if (! ($mediasite = $DB->get_record("mediasite", array("id" => $cm->instance)))) {
+        print_error(get_string('error_course_module_incorrect', 'mediasite'));
+    } else {
+        if (! ($course = $DB->get_record("course", array("id" => $mediasite->course)))) {
+            print_error(get_string('error_course_misconfigured', 'mediasite'));
+        }
+        if (! ($cm = get_coursemodule_from_instance("mediasite", $mediasite->id, $course->id))) {
+            print_error(get_string('error_course_module_id_incorrect', 'mediasite'));
+        }
+    }
+
+    require_login($course);
+
+    if ($resourceid == '') {
+        mediasite_basiclti_mediasite_view($course, $mediasite->siteid, $endpoint,
+            mediasite_guid_to_muid($mediasite->resourceid, $mediasite->resourcetype));
+    } else {
+        mediasite_basiclti_mediasite_view($course, $mediasite->siteid, $endpoint,
+            mediasite_guid_to_muid($mediasite->resourceid, $mediasite->resourcetype));
+    }
+}

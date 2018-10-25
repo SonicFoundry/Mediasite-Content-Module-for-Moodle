@@ -75,6 +75,7 @@ class MediasiteSite {
     private $lticonsumersecret;
     private $lticustomparameters;
     private $showintegrationcatalog;
+    private $showassignmentsubmission;
     private $integrationcatalogtitle;
     private $openpopupintegrationcatalog;
     private $showmymediasite;
@@ -95,6 +96,7 @@ class MediasiteSite {
                 $this->lticustomparameters = $record->lti_custom_parameters;
                 $this->embedformats = $record->embed_formats;
                 $this->showintegrationcatalog = $record->show_integration_catalog;
+                $this->showassignmentsubmission = $record->show_assignment_submission;
                 $this->integrationcatalogtitle = $record->integration_catalog_title;
                 $this->openpopupintegrationcatalog = $record->openpopup_integration_catalog;
                 $this->showmymediasite = $record->show_my_mediasite;
@@ -111,6 +113,7 @@ class MediasiteSite {
                 $this->lticustomparameters = $record->lti_custom_parameters;
                 $this->embedformats = $record->embed_formats;
                 $this->showintegrationcatalog = $record->show_integration_catalog;
+                $this->showassignmentsubmission = $record->show_assignment_submission;
                 $this->integrationcatalogtitle = $record->integration_catalog_title;
                 $this->openpopupintegrationcatalog = $record->openpopup_integration_catalog;
                 $this->showmymediasite = $record->show_my_mediasite;
@@ -130,6 +133,7 @@ class MediasiteSite {
                     $this->lticustomparameters = $record->lti_custom_parameters;
                     $this->embedformats = $record->embed_formats;
                     $this->showintegrationcatalog = $record->show_integration_catalog;
+                    $this->showassignmentsubmission = $record->show_assignment_submission;
                     $this->integrationcatalogtitle = $record->integration_catalog_title;
                     $this->openpopupintegrationcatalog = $record->openpopup_integration_catalog;
                     $this->showmymediasite = $record->show_my_mediasite;
@@ -151,6 +155,7 @@ class MediasiteSite {
         $record->lti_custom_parameters = $this->lticustomparameters;
         $record->embed_formats = $this->embedformats;
         $record->show_integration_catalog = $this->showintegrationcatalog;
+        $record->show_assignment_submission = $this->showassignmentsubmission;
         $record->integration_catalog_title = $this->integrationcatalogtitle;
         $record->openpopup_integration_catalog = $this->openpopupintegrationcatalog;
         $record->show_my_mediasite = $this->showmymediasite;
@@ -269,6 +274,12 @@ class MediasiteSite {
     public function get_show_integration_catalog() {
         return $this->showintegrationcatalog;
     }
+    public function set_show_assignment_submission($value) {
+        $this->showassignmentsubmission = $value;
+    }
+    public function get_show_assignment_submission() {
+        return $this->showassignmentsubmission;
+    }
     public function set_integration_catalog_title($value) {
         $this->integrationcatalogtitle = $value;
     }
@@ -371,5 +382,56 @@ class MediasiteSite {
         } else {
             return false;
         }
+    }
+}
+
+class MediasiteAssignmentDetail {
+    private $key;
+    private $value;
+
+    /**
+     * Get the value of key
+     */
+    public function getkey() {
+        return $this->key;
+    }
+
+    /**
+     * Set the value of key
+     *
+     * @return  self
+     */
+    public function setkey($key) {
+        $this->key = $key;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of value
+     */
+    public function getvalue() {
+        return $this->value;
+    }
+
+    /**
+     * Set the value of value
+     *
+     * @return  self
+     */
+    public function setvalue($value) {
+        $this->value = $value;
+
+        return $this;
+    }
+
+    public function __construct() {
+    }
+
+    public static function withdetails($key, $value) {
+        $instance = new self();
+        $instance->key = $key;
+        $instance->value = $value;
+        return $instance;
     }
 }

@@ -56,10 +56,18 @@ if (!$defaultsiteid) {
         $record = new stdclass();
         $record->course = $courseid;
         $record->mediasite_site = $data->siteid;
-        $record->mediasite_courses_enabled = $DB->get_field(
+        $mediasitecoursesenabled = $DB->get_field(
             'mediasite_sites',
             'show_integration_catalog',
             array('id' => $data->siteid));
+        $record->mediasite_courses_enabled = ($mediasitecoursesenabled > 1);
+
+        $showassignmentsubmission = $DB->get_field(
+            'mediasite_sites',
+            'show_assignment_submission',
+            array('id' => $data->siteid));
+        $record->assignment_submission_enabled = ($showassignmentsubmission > 1);
+
         $DB->insert_record($configtable, $record);
 
         $mform->launchredirect($courseid, $data->siteid);

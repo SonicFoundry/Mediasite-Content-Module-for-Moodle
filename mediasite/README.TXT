@@ -6,8 +6,8 @@ Mediasite Activity Module for Moodle 3.3+
 
  This module has been tested for:
 
-    - Moodle 3.1.8, 3.2.5, and 3.3.2
-    - Mediasite EVP Server 7.0.30
+    - Moodle 3.3.2, 3.4.2, and 3.5+
+    - Mediasite EVP Server 7.2.2
     - Upgrades from Mediasite Activity Module versions 2017030500
     - Backup/Restore functionality
 

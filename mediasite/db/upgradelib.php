@@ -508,6 +508,20 @@ function mediasite_upgrade_from_2016041803($oldversion, $dbman, $plugin) {
     return true;
 }
 
+function mediasite_upgrade_from_2017020100($oldversion, $dbman, $plugin) {
+    $sitestable = new \xmldb_table('mediasite_sites');
+    $sitesfield = new \xmldb_field('show_assignment_submission', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', null);
+
+    // Conditionally launch add field show_assignment_submission.
+    conditionally_add_field_to_table($sitestable, $sitesfield, $dbman);
+
+    $coursetable = new \xmldb_table('mediasite_course_config');
+    $coursefield = new \xmldb_field('assignment_submission_enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', null);
+
+    // Conditionally launch add field assignment_submission_enabled.
+    conditionally_add_field_to_table($coursetable, $coursefield, $dbman);
+}
+
 function conditionally_add_field_to_table($table, $field, $dbman) {
     // Conditionally launch add field intro.
     if (!$dbman->field_exists($table, $field)) {

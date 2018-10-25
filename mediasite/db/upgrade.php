@@ -52,6 +52,11 @@ function xmldb_mediasite_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2017020100, 'mediasite');
     }
 
+    if ($oldversion < 2018062201) {
+        $result = \mod_mediasite\db\upgradelib\mediasite_upgrade_from_2017020100($oldversion, $dbman, $plugin);
+        upgrade_mod_savepoint(true, 2018062201, 'mediasite');
+    }
+
     return true;
 }
 

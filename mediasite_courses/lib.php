@@ -44,10 +44,12 @@ function local_mediasite_courses_extend_navigation(global_navigation $nav) {
     mediasite_navigation_extension_courses7_course();
 }
 
+
 function local_mediasite_courses_extends_navigation(global_navigation $nav) {
     if (!is_mod_mediasite_installed()) {
         return;
     }
+
     // this is the callback for pre-2.9
     local_mediasite_courses_extend_navigation($nav);
 }

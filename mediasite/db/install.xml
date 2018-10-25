@@ -1,74 +1,80 @@
-<XMLDB COMMENT="XMLDB file for Moodle mod/mediasite" PATH="mod/mediasite/db" VERSION="20160113">
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/mediasite/db" VERSION="20180626" COMMENT="XMLDB file for Moodle mod/mediasite"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
   <TABLES>
-    <TABLE COMMENT="main mediasite activity table" NAME="mediasite">
+    <TABLE NAME="mediasite" COMMENT="main mediasite activity table">
       <FIELDS>
-        <FIELD LENGTH="10" NAME="id" NOTNULL="true" SEQUENCE="true" TYPE="int"/>
-        <FIELD COMMENT="Course mediasite activity belongs to" DEFAULT="0" LENGTH="10" NAME="course" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
-        <FIELD COMMENT="name field for moodle instances" LENGTH="255" NAME="name" NOTNULL="true" SEQUENCE="false" TYPE="char"/>
-        <FIELD NAME="description" NOTNULL="false" SEQUENCE="false" TYPE="text"/>
-        <FIELD LENGTH="36" NAME="resourceid" NOTNULL="true" SEQUENCE="false" TYPE="char"/>
-        <FIELD LENGTH="255" NAME="resourcetype" NOTNULL="true" SEQUENCE="false" TYPE="char"/>
-        <FIELD DEFAULT="0" LENGTH="1" NAME="openaspopup" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
-        <FIELD COMMENT="Presentation's record date" LENGTH="10" NAME="recorddateutc" NOTNULL="false" SEQUENCE="false" TYPE="int"/>
-        <FIELD COMMENT="Presentation's presenters" NAME="presenters" NOTNULL="false" SEQUENCE="false" TYPE="text"/>
-        <FIELD COMMENT="Presentation's tags" NAME="sofotags" NOTNULL="false" SEQUENCE="false" TYPE="text"/>
-        <FIELD LENGTH="50" NAME="displaymode" NOTNULL="false" SEQUENCE="false" TYPE="char"/>
-        <FIELD LENGTH="1000" NAME="launchurl" NOTNULL="false" SEQUENCE="false" TYPE="char"/>
-        <FIELD COMMENT="The id of the site. It has to match the other mediasite table that contains the list of sites" LENGTH="10" NAME="siteid" NOTNULL="false" SEQUENCE="false" TYPE="int"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Course mediasite activity belongs to"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="name field for moodle instances"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="resourceid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="resourcetype" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="openaspopup" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="recorddateutc" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Presentation's record date"/>
+        <FIELD NAME="presenters" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Presentation's presenters"/>
+        <FIELD NAME="sofotags" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Presentation's tags"/>
+        <FIELD NAME="displaymode" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="launchurl" TYPE="char" LENGTH="1000" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="siteid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The id of the site. It has to match the other mediasite table that contains the list of sites"/>
       </FIELDS>
       <KEYS>
-        <KEY FIELDS="id" NAME="primary" TYPE="primary"/>
-        <KEY FIELDS="siteid" NAME="siteidforeignkey" REFFIELDS="id" REFTABLE="mediasite_sites" TYPE="foreign"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="siteidforeignkey" TYPE="foreign" FIELDS="siteid" REFTABLE="mediasite_sites" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX FIELDS="course" NAME="course" UNIQUE="false"/>
+        <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
       </INDEXES>
     </TABLE>
-    <TABLE COMMENT="Site table for multiple mediasite sites" NAME="mediasite_sites">
+    <TABLE NAME="mediasite_sites" COMMENT="Site table for multiple mediasite sites">
       <FIELDS>
-        <FIELD LENGTH="10" NAME="id" NOTNULL="true" SEQUENCE="true" TYPE="int"/>
-        <FIELD COMMENT="Name of site" DEFAULT="Default" LENGTH="255" NAME="sitename" NOTNULL="true" SEQUENCE="false" TYPE="char"/>
-        <FIELD LENGTH="255" NAME="endpoint" NOTNULL="true" SEQUENCE="false" TYPE="char"/>
-        <FIELD LENGTH="255" NAME="lti_consumer_key" NOTNULL="false" SEQUENCE="false" TYPE="char"/>
-        <FIELD LENGTH="255" NAME="lti_consumer_secret" NOTNULL="false" SEQUENCE="false" TYPE="char"/>
-        <FIELD NAME="lti_custom_parameters" NOTNULL="false" SEQUENCE="false" TYPE="text"/>
-        <FIELD DEFAULT="0" LENGTH="1" NAME="show_integration_catalog" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
-        <FIELD DEFAULT="Mediasite Catalog" LENGTH="255" NAME="integration_catalog_title" NOTNULL="true" SEQUENCE="false" TYPE="char"/>
-        <FIELD DEFAULT="0" LENGTH="1" NAME="openpopup_integration_catalog" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
-        <FIELD DEFAULT="0" LENGTH="1" NAME="show_my_mediasite" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
-        <FIELD DEFAULT="My Mediasite" LENGTH="255" NAME="my_mediasite_title" NOTNULL="true" SEQUENCE="false" TYPE="char"/>
-        <FIELD DEFAULT="0" LENGTH="1" NAME="my_mediasite_placement" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
-        <FIELD DEFAULT="0" LENGTH="1" NAME="openaspopup_my_mediasite" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
-        <FIELD DEFAULT="0" LENGTH="1" NAME="lti_debug_launch" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
-        <FIELD DEFAULT="31" LENGTH="10" NAME="embed_formats" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="sitename" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="Default" SEQUENCE="false" COMMENT="Name of site"/>
+        <FIELD NAME="endpoint" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="lti_consumer_key" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="lti_consumer_secret" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="lti_custom_parameters" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="show_integration_catalog" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="integration_catalog_title" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="Mediasite Catalog" SEQUENCE="false"/>
+        <FIELD NAME="openpopup_integration_catalog" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="show_my_mediasite" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="my_mediasite_title" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="My Mediasite" SEQUENCE="false"/>
+        <FIELD NAME="my_mediasite_placement" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="openaspopup_my_mediasite" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="lti_debug_launch" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="embed_formats" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="31" SEQUENCE="false"/>
+        <FIELD NAME="show_assignment_submission" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
-        <KEY FIELDS="id" NAME="primary" TYPE="primary"/>
-        <KEY FIELDS="sitename" NAME="sitename" TYPE="unique"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="sitename" TYPE="unique" FIELDS="sitename"/>
       </KEYS>
     </TABLE>
-    <TABLE COMMENT="mediasite configuration table" NAME="mediasite_config">
+    <TABLE NAME="mediasite_config" COMMENT="mediasite configuration table">
       <FIELDS>
-        <FIELD LENGTH="10" NAME="id" NOTNULL="true" SEQUENCE="true" TYPE="int"/>
-        <FIELD COMMENT="The id of the site. It has to match the other mediasite table that contains the list of sites" LENGTH="10" NAME="siteid" NOTNULL="false" SEQUENCE="false" TYPE="int"/>
-        <FIELD DEFAULT="0" LENGTH="1" NAME="openaspopup" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="siteid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The id of the site. It has to match the other mediasite table that contains the list of sites"/>
+        <FIELD NAME="openaspopup" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
-        <KEY FIELDS="id" NAME="primary" TYPE="primary"/>
-        <KEY FIELDS="siteid" NAME="defaultsiteidforeignkey" REFFIELDS="id" REFTABLE="mediasite_sites" TYPE="foreign"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="defaultsiteidforeignkey" TYPE="foreign" FIELDS="siteid" REFTABLE="mediasite_sites" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="mediasite_course_config" COMMENT="Mediasite Course Configuration">
       <FIELDS>
-        <FIELD LENGTH="10" NAME="id" NOTNULL="true" SEQUENCE="true" TYPE="int"/>
-        <FIELD LENGTH="10" NAME="course" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
-        <FIELD LENGTH="10" NAME="mediasite_site" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
-        <FIELD LENGTH="1" NAME="mediasite_courses_enabled" NOTNULL="true" SEQUENCE="false" TYPE="int"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="mediasite_site" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="mediasite_courses_enabled" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="assignment_submission_enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
-        <KEY FIELDS="id" NAME="primary" TYPE="primary"/>
-        <KEY FIELDS="course" NAME="foreignkey_course" REFFIELDS="id" REFTABLE="course" TYPE="foreign"/>
-        <KEY FIELDS="mediasite_site" NAME="foreignkey_mediasite_sites" REFFIELDS="id" REFTABLE="mediasite_sites" TYPE="foreign"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="foreignkey_course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="foreignkey_mediasite_sites" TYPE="foreign" FIELDS="mediasite_site" REFTABLE="mediasite_sites" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>

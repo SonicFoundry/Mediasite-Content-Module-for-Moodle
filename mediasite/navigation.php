@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot.'/mod/mediasite/basiclti_mediasite_lib.php');
+require_once($CFG->dirroot.'/mod/mediasite/locallib.php');
 
 function mediasite_extend_navigation_user_settings(
     navigation_node $parentnode,
@@ -36,7 +37,7 @@ function mediasite_extend_navigation_user_settings(
 
 function mediasite_navigation_extension_mymediasite() {
     global $PAGE;
-    debugging('mediasite_navigation_extension_mymediasite');
+    blowup('mediasite_navigation_extension_mymediasite');
     $mediasitenode = $PAGE->navigation->add(get_string('mediasite', 'mediasite'), null, navigation_node::TYPE_COURSE);
     $url = new moodle_url('/mod/mediasite/mymediasite.php');
     $mymediasitenode = $mediasitenode->add(get_string('my_mediasite', 'mediasite'), $url);
@@ -53,14 +54,16 @@ function mediasite_extend_navigation_course_settings(navigation_node $parentnode
     $label = get_string('course_settings', 'mediasite');
     $key = 'mediasite_course_settings';
     $coursesettings = $parentnode->get($key);
+
     if ($coursesettings == null && $PAGE->course->id > 1) {
         $coursesettings = $parentnode->add(
             $label,
             new moodle_url(
                 '/mod/mediasite/site/course_settings.php',
                 array('id' => $PAGE->course->id)
-            ), navigation_node::TYPE_SETTING, null, $key, new pix_icon('i/settings', $label));
+        ), navigation_node::TYPE_SETTING, null, $key, new pix_icon('i/settings', $label));
     }
+
     return $coursesettings;
 }
 
@@ -82,8 +85,14 @@ function mediasite_navigation_extension_mymediasite_placement() {
         $id = $PAGE->course->id;
     }
     $mymediasitecapability = 'mod/mediasite:mymediasite';
+
+    $haspermission = mediasite_has_capability_in_any_context($mymediasitecapability);
+    if (!$haspermission) {
+        return;
+    }
+
     $mymediasiteplacements = get_mediasite_sites(false, true);
-    $sitepagesnode = $PAGE->navigation->get('home');
+
     $coursenode = null;
     $coursecontext = null;
     $coursemediasitesite = null;
@@ -97,48 +106,91 @@ function mediasite_navigation_extension_mymediasite_placement() {
 
     $showboostdivider = true;
 
+    $inpagemenuoffset = 0;
     foreach ($mymediasiteplacements as $site) {
         $url = new moodle_url('/mod/mediasite/mymediasite.php', array('id' => $id, 'siteid' => $site->id));
+
         switch ($site->my_mediasite_placement) {
             case mediasite_menu_placement::SITE_PAGES:
-                if (has_capability($mymediasitecapability, $usercontext)) {
-                    $sitepagesnode->add($site->my_mediasite_title, $url);
+                if ($haspermission) {
+
+                    $sitepagenode = $PAGE->navigation->add($site->my_mediasite_title, $url, navigation_node::TYPE_CONTAINER);
+                    // Comment out: "$sitepagenode->title("this is title!");".
+                    $sitepagenode->isexpandable = true;
+                    $sitepagenode->showinflatnavigation = true;
+
                     if (is_boost_navigation_available()) {
                         add_to_boost_navigation($site->my_mediasite_title, $url, $usercontext, $showboostdivider);
                         $showboostdivider = false;
                     }
                 }
                 break;
+
             case mediasite_menu_placement::COURSE_MENU:
                 if (1 > 1) {
                     if (is_null($coursecontext) || $coursecontext == null) {
-                        debugging('coursecontext is null');
+                        blowup('coursecontext is null');
                     }
                     if (is_null($coursenode) || $coursenode == null) {
-                        debugging('coursenode is null');
+                        blowup('coursenode is null');
                     }
-                    if (!has_capability($mymediasitecapability, $coursecontext)) {
-                        debugging('missing MyMediasite capability');
+                    if (!$haspermission) {
+                        blowup('missing MyMediasite capability');
                     }
                 }
-                if ($coursecontext != null && $coursenode != null && has_capability($mymediasitecapability, $coursecontext)) {
+                if ($coursecontext != null && $coursenode != null && $haspermission) {
                     $coursenode->add($site->my_mediasite_title, $url);
                 }
-                if (is_boost_navigation_available()) {
+                if (is_boost_navigation_available() && $haspermission) {
                     add_to_boost_navigation($site->my_mediasite_title, $url, $usercontext, $showboostdivider);
                 }
                 break;
+
+            case mediasite_menu_placement::INPAGE_MENU:
+                if ($haspermission) {
+                    $inpagemenuoffset++;
+                    $islastmenu = $inpagemenuoffset == 1;
+                    $title = $site->my_mediasite_title;
+                    add_inpage_menu($title, $url, $islastmenu);
+                }
+                break;
+
             default:
-                debugging('The value for my_mediasite_placement in mediasite_navigation_extension_mymediasite_placement'.
+                blowup('The value for my_mediasite_placement in mediasite_navigation_extension_mymediasite_placement'.
                     ' is not valid. The value was '.$site->get_my_mediasite_placement().'.');
         }
     }
+}
+
+function add_inpage_menu($title, $url, $islastmenu) {
+    global $PAGE;
+
+    $menuappend = 0;
+    $menusearch = '#region-main';
+    $style = 'class="btn btn-default pull-right"';
+    $inlinestyle = ' style="margin-left:5px;"';
+    $menu = '<a '.$style.$inlinestyle.' href="'. $url.'">'.$title.' </a>';
+    if ($islastmenu) {
+        $menu .= '<br><br>';
+    }
+
+    $PAGE->requires->yui_module(['moodle-mod_mediasite-custmenu'],
+        'M.local_mediasite.custmenu.init',
+        [[
+            'menusearch' => $menusearch,
+            'menuappend' => $menuappend,
+            'items'      => $menu,
+        ]],
+        null,
+        false
+    );
 }
 
 function is_boost_navigation_available() {
     global $PAGE, $CFG;
     $reason = 'All tests passed.';
     $result = true;
+
     try {
         if (!isLoggedIn()) {
             $reason = 'is_boost_navigation_available found you are not logged in';
@@ -193,7 +245,7 @@ function add_to_boost_navigation($linktext, $url, $context, $showboostdivider) {
         $PAGE->flatnav->add($flat);
         $templatecontext['flatnavigation'] = $PAGE->flatnav;
     } catch (Exception $e) {
-        debugging('add_to_boost_navigation broke, ' . $e->getMessage());
+        blowup('add_to_boost_navigation broke, ' . $e->getMessage());
     }
 }
 
@@ -203,9 +255,9 @@ function starts_with($haystack, $needle) {
 }
 
 function mediasite_navigation_extension_courses7_course() {
-
     global $PAGE, $DB;
     $course = $PAGE->course;
+    $currenttheme = $PAGE->theme->name;
 
     if ($course && $course->id > 1) {
         $context = context_course::instance($course->id);
@@ -217,16 +269,23 @@ function mediasite_navigation_extension_courses7_course() {
 
         try {
             $courseconfig = $DB->get_record('mediasite_course_config', array('course' => $course->id), '*', MUST_EXIST);
-
             if ($courseconfig->mediasite_courses_enabled) {
                 $site = new Sonicfoundry\MediasiteSite($courseconfig->mediasite_site);
+                $sitetitle = $site->get_integration_catalog_title();
                 $url = new moodle_url(
                     '/mod/mediasite/courses7.php',
                     array('id' => $course->id, 'siteid' => $courseconfig->mediasite_site)
                 );
-                $coursesnode = $coursenode->add($site->get_integration_catalog_title(), $url);
+
+                // For course Catalog, force to show as INPAGE_MENU if current theme is 'snap'.
+                if ($currenttheme == 'snap') {
+                    add_inpage_menu($sitetitle, $url, false);
+                } else {
+                    $coursesnode = $coursenode->add($site->get_integration_catalog_title(), $url);
+                }
+
                 if (is_boost_navigation_available()) {
-                    add_to_boost_navigation($site->get_integration_catalog_title(), $url, $context, false);
+                    add_to_boost_navigation($sitetitle, $url, $context, false);
                 }
             }
         } catch (Exception $e) {
@@ -258,5 +317,7 @@ function get_mediasite_sites($onlyintegrationcatalogenabled = false, $onlymymedi
 }
 
 function blowup($msg) {
-    debugging($msg);
+    if (1 > 1) {
+        blowup($msg);
+    }
 }

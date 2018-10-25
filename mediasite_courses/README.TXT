@@ -1,14 +1,14 @@
 ==================================================
-Mediasite Local Module for Moodle 3.1+
+Mediasite Local Module for Moodle 3.3+
 ==================================================
 
- The Mediasite Local Module for Moodle 3.1+ integrates Mediasite content into Moodle.
+ The Mediasite Local Module for Moodle 3.3+ integrates Mediasite content into Moodle.
 
  This module has been tested for:
 
-    - Moodle 3.1.8, 3.2.5, and 3.3.2
-    - Mediasite EVP Server 7.0.30
-    - Upgrades from Mediasite Local Module versions 2016072200
+    - Moodle 3.3.2, 3.4.2, and 3.5+
+    - Mediasite EVP Server 7.2.2
+    - Upgrades from Mediasite Local Module versions 2017111300 and 2018072000
     - Backup/Restore functionality
 
  This software is provided "AS IS" without a warranty of any kind.
@@ -18,8 +18,9 @@ Requirements
 ============
 
     - Mediasite Mediasite EVP Server 7.0.28 or later.
-    - Moodle 3.1.8 or later.
-
+    - Moodle 3.3.2 or later.
+    - Mediasite Activity Module (current version)
+    
 ==========
 Overview
 ==========

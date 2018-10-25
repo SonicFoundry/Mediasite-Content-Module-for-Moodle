@@ -57,6 +57,7 @@ if ($mform->is_cancelled()) {
 $data = $mform->get_data();
 if ($data) {
     $navinstalled = $mform->is_navigation_installed();
+    $attoinstalled = $mform->is_atto_installed();
     $site->set_sitename($data->sitename);
     $site->set_endpoint($data->siteurl);
     $site->set_lti_consumer_key($data->sitelti_consumer_key);
@@ -70,6 +71,9 @@ if ($data) {
         $site->set_my_mediasite_title($data->my_mediasite_title);
         $site->set_my_mediasite_placement($data->my_mediasite_placement);
         $site->set_openaspopup_my_mediasite($data->openaspopup_my_mediasite);
+    }
+    if ($attoinstalled) {
+        $site->set_show_assignment_submission($data->show_assignment_submission);
     }
     $site->set_lti_debug_launch($data->lti_debug_launch);
     $site->set_lti_embed_type_thumbnail($data->lti_embed_type_thumbnail);
@@ -99,5 +103,4 @@ echo "<td colspan=\"2\">";
 $mform->display();
 
 echo '</td></tr></table>';
-
 echo $OUTPUT->footer();

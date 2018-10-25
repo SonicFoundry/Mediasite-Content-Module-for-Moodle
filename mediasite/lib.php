@@ -104,24 +104,25 @@ function mediasite_get_coursemodule_info($coursemodule) {
         'presenters, LENGTH(LTRIM(RTRIM(presenters))) AS presenters_length, sofotags, '.
         'LENGTH(LTRIM(RTRIM(sofotags))) AS tags_length, displaymode, launchurl, siteid')) {
 
-        $lti = $DB->get_record('mediasite_sites', array('id' => $mediasite->siteid), $fields = '*', $strictness = MUST_EXIST);
-        // On upgrade, the lti consumer key must be set to allow a successful post. Only show this if the configuration is valid.
-        if (isset($lti->lti_consumer_key)) {
-            if (empty($mediasite->name)) {
-                $mediasite->name = "label{$mediasite->id}";
-                $DB->set_field('mediasite', 'name', $mediasite->name, array('id' => $mediasite->id));
-            }
-            if (!$record = $DB->get_record("mediasite_sites", array('id' => $mediasite->siteid))) {
-                mediasite_delete_instance($mediasite->id);
+        if ($lti = $DB->get_record('mediasite_sites', array('id' => $mediasite->siteid))) {
+            // On upgrade, the lti consumer key must be set to allow a successful post. Only show this if the config is valid.
+            if (isset($lti->lti_consumer_key)) {
+                if (empty($mediasite->name)) {
+                    $mediasite->name = "label{$mediasite->id}";
+                    $DB->set_field('mediasite', 'name', $mediasite->name, array('id' => $mediasite->id));
+                }
+                if (!$record = $DB->get_record("mediasite_sites", array('id' => $mediasite->siteid))) {
+                    mediasite_delete_instance($mediasite->id);
+                    return null;
+                }
+
+                $info = new cached_cm_info();
+                $info->content = render_mediasite_resource($mediasite, $coursemodule, $lti);
+
+                return $info;
+            } else {
                 return null;
             }
-
-            $info = new cached_cm_info();
-            $info->content = render_mediasite_resource($mediasite, $coursemodule, $lti);
-
-            return $info;
-        } else {
-            return null;
         }
 
     } else {
@@ -151,7 +152,7 @@ function render_mediasite_resource($mediasite, $coursemodule, $lti) {
         'var foundparent = false;'.
         'var parent = mc.parentNode;'.
         'while (!foundparent && parent !== null) {'.
-        '   if (parent.classList.contains("mod-indent-outer")) {'.
+        '   if (parent.classList !=null && parent.classList.contains("mod-indent-outer")) {'.
         '       foundparent = true;'.
         '       parent.style.width = "100%";'.
         '   } else {'.

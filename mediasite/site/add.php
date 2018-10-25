@@ -50,6 +50,7 @@ if ($mform->is_cancelled()) {
 $data = $mform->get_data();
 if ($data) {
     $navinstalled = $mform->is_navigation_installed();
+    $attoinstalled = $mform->is_atto_installed();
     $record = new stdClass();
     $url = $data->siteurl;
     $record->sitename = $data->sitename;
@@ -68,6 +69,9 @@ if ($data) {
         $record->my_mediasite_title = $data->my_mediasite_title;
         $record->my_mediasite_placement = $data->my_mediasite_placement;
         $record->openaspopup_my_mediasite = $data->openaspopup_my_mediasite;
+    }
+    if ($attoinstalled) {
+        $record->show_assignment_submission = $data->show_assignment_submission;
     }
     $record->lti_debug_launch = $data->lti_debug_launch;
     $record->embed_formats = $data->lti_embed_type_thumbnail;

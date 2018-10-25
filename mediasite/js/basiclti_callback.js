@@ -1,4 +1,3 @@
-<!-- BEGIN basiclti_callback.js -->
 /**
  * Provides support to map the data returned from Mediasite to the Moodle form for persistence to the database.
  *
@@ -6,17 +5,23 @@
  * @param {object} message
  */
 function MediasiteLtiCallBack(message) {
+    // We should use '==' instead of '===' here, so that we can find both 'null' and 'undefined'.
+    if (message.data == null || message.data.Mode == null || message.data.EntityType == null
+        || message.data.LaunchUrl == null || message.data.Title == null) {
+        return;
+    }
+
     setFormValue('id_siteid', message.data.ext_content_return_url);
     setFormValue('id_name', message.data.Title);
     setFormValue('id_description', message.data.Description);
     setFormValue('id_resourcetype', message.data.EntityType);
     setFormValue('id_resourceid', message.data.ResourceId);
-    setFormValue('id_launchurl', message.data.LaunchURL); // base64 encoded
+    setFormValue('id_launchurl', message.data.LaunchURL);
     setFormValue('id_displaymode', message.data.Mode);
     if (message.data.EntityType === 'Presentation') {
         setFormValue('id_recorddateutc', (new Date(message.data.RecordDateTimeUTC).getTime() / 1000).toFixed(0));
         if (message.data.Presenters != undefined && message.data.Presenters !== null && message.data.Presenters.length > 0) {
-            setFormValue('id_presenters', message.data.Presenters.join('~!~')); // collapse array to string??
+            setFormValue('id_presenters', message.data.Presenters.join('~!~'));
             setFormValue('id_presenters_display', message.data.Presenters.join('\n\n'));
         }
         if (message.data.Tags != undefined && message.data.Tags !== null && message.data.Tags.length > 0) {
@@ -25,7 +30,7 @@ function MediasiteLtiCallBack(message) {
         }
     } else {
         setFormValue('id_recorddateutc', (new Date().getTime() / 1000).toFixed(0));
-        setFormValue('id_presenters', ''); // collapse array to string??
+        setFormValue('id_presenters', '');
         setFormValue('id_sofotags', '');
     }
 
@@ -90,4 +95,3 @@ function toggleDisplayOfParentDiv(currentControl, visible) {
 }
 
 window.addEventListener("message", MediasiteLtiCallBack, false);
-<!-- END basiclti_callback.js -->

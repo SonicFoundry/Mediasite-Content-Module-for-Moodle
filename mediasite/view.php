@@ -39,12 +39,17 @@ if ($cm == null) {
     return;
 }
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$mediasite = $DB->get_record("mediasite", array("id" => $cm->instance));
 
 $context = context_module::instance($cm->id);
-
 require_login($course, true);
 require_capability('mod/mediasite:view', $context);
+
+$mediasite = $DB->get_record("mediasite", array("id" => $cm->instance));
+
+if (!$lti = $DB->get_record("mediasite_sites", array("id" => $mediasite->siteid))) {
+    print_error(get_string('error_site_id_incorrect', 'mediasite'));
+    return;
+}
 
 $url = new moodle_url('/mod/mediasite/view.php', array('id' => $id, 'a' => $a, 'frameset' => $frameset, 'inpopup' => $inpopup));
 
@@ -98,3 +103,11 @@ if ($mediasite->openaspopup == '1' and !$inpopup) {
 
 echo $OUTPUT->footer();
 
+$event = \mod_mediasite\event\course_module_viewed::create(array(
+    'objectid' => $mediasite->id,
+    'context' => $context
+    ));
+    $event->add_record_snapshot('course_modules', $cm);
+    $event->add_record_snapshot('course', $course);
+    $event->add_record_snapshot('mediasite', $mediasite);
+    $event->trigger();

@@ -62,13 +62,16 @@ if ($mform->get_data()) {
         'show_integration_catalog',
         array('id' => $data->mediasite_site)
     );
-    if ($siteshowintegrationcatalog == 3) {
-        $record->mediasite_courses_enabled = 1;
-    } else if ($siteshowintegrationcatalog == 0) {
-        $record->mediasite_courses_enabled = 0;
-    } else {
-        $record->mediasite_courses_enabled = $data->mediasite_courses_enabled;
-    }
+    $record->mediasite_courses_enabled = mediasite_resolve_site_course_setting($siteshowintegrationcatalog,
+        $data->mediasite_courses_enabled);
+
+    $siteshowassignmentsubmission = $DB->get_field(
+        'mediasite_sites',
+        'show_assignment_submission',
+        array('id' => $data->mediasite_site)
+    );
+    $record->assignment_submission_enabled = mediasite_resolve_site_course_setting($siteshowassignmentsubmission,
+        $data->assignment_submission_enabled);
 
     if ($isupdate) {
         $DB->update_record('mediasite_course_config', $record);
@@ -83,3 +86,13 @@ echo $OUTPUT->header();
 $mform->display();
 
 echo $OUTPUT->footer();
+
+function mediasite_resolve_site_course_setting($sitesetting, $coursesetting) {
+    if ($sitesetting == 3) {
+        return 1;
+    } else if ($sitesetting == 0) {
+        return 0;
+    } else {
+        return $coursesetting;
+    }
+}

@@ -66,6 +66,7 @@ class mod_course_settings_form extends \moodleform {
         }
 
         $courses7locked = false;
+        $assignmentsubmissionlocked = false;
 
         foreach ($sitelist as $site) {
             $sitenames[$site->id] = $site->sitename;
@@ -73,9 +74,11 @@ class mod_course_settings_form extends \moodleform {
                 $json = $json.', ';
             }
             $json = $json.'{"id":"'.$site->id.'", "name":"'.htmlspecialchars($site->sitename).'", "coursesTitle":"'.
-            htmlspecialchars($site->integration_catalog_title).'", "showIntegrationCatalog":"'.$site->show_integration_catalog.'"}';
+            htmlspecialchars($site->integration_catalog_title).'", "showIntegrationCatalog":"'
+                .$site->show_integration_catalog.'", "showAssignmentSubmission":"'.$site->show_assignment_submission.'"}';
             if ($site->id == $currentsiteid) {
                 $courses7locked = $site->show_integration_catalog == 0 || $site->show_integration_catalog == 3;
+                $assignmentsubmissionlocked = $site->show_assignment_submission == 0 || $site->show_assignment_submission == 3;
             }
         }
         $json = '{"sites": ['.$json.']}';
@@ -94,6 +97,10 @@ class mod_course_settings_form extends \moodleform {
         if ($courses7locked) {
             $courseoptions = array('disabled' => 'disabled');
         }
+        $assignmentsubmissionoptions = null;
+        if ($assignmentsubmissionlocked) {
+            $assignmentsubmissionoptions = array('disabled' => 'disabled');
+        }
 
         $coursesmode = $mform->addElement(
             'advcheckbox',
@@ -104,13 +111,26 @@ class mod_course_settings_form extends \moodleform {
             array(0, 1)
         );
 
+        $assignmentsubmissionmode = $mform->addElement(
+            'advcheckbox',
+            'assignment_submission_enabled',
+            get_string('assignment_submission_enabled', 'mediasite'),
+            '&nbsp;',
+            $assignmentsubmissionoptions,
+            array(0, 1)
+        );
+
         if (!$courseconfig) {
             $sitedropdown->setSelected($defaults->siteid);
-            $show = $DB->get_field('mediasite_sites', 'show_integration_catalog', array('id' => $defaults->siteid));
-            $mform->setDefault('mediasite_courses_enabled', ($show > 1));
+            $showcourses = $DB->get_field('mediasite_sites', 'show_integration_catalog', array('id' => $defaults->siteid));
+            $mform->setDefault('mediasite_courses_enabled', ($showcourses > 1));
+            $showassignment = $DB->get_field('mediasite_sites', 'show_assignment_submission', array('id' => $defaults->siteid));
+            $mform->setDefault('assignment_submission_enabled', ($showassignment > 1));
+
         } else {
             $sitedropdown->setSelected($courseconfig->mediasite_site);
             $mform->setDefault('mediasite_courses_enabled', $courseconfig->mediasite_courses_enabled);
+            $mform->setDefault('assignment_submission_enabled', $courseconfig->assignment_submission_enabled);
         }
 
         $mform->addElement('hidden', 'id', $this->courseid);

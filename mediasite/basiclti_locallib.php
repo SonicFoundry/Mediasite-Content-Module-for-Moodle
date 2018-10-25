@@ -34,7 +34,8 @@ require_once($CFG->dirroot.'/lib/simplepie/library/SimplePie/Misc.php');
  *
  * $param int $basicltiid       Basic LTI activity id
  */
-function mediasite_basiclti_view($instance, $siteid, $typeconfig, $endpoint, $arrayofenrollments = null) {
+function mediasite_basiclti_view($instance, $siteid, $typeconfig, $endpoint, $arrayofenrollments = null,
+    $arrayofcustomparameters = null) {
     global $PAGE, $CFG;
 
     $key = $typeconfig->lti_consumer_key;
@@ -44,7 +45,8 @@ function mediasite_basiclti_view($instance, $siteid, $typeconfig, $endpoint, $ar
     $instance->preferheight = 600;
 
     $course = $PAGE->course;
-    $requestparams = mediasite_basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollments);
+    $requestparams = mediasite_basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollments,
+        $arrayofcustomparameters);
 
     // Make sure we let the tool know what LMS they are being called from.
     $requestparams["ext_lms"] = "moodle-2";
@@ -66,6 +68,7 @@ function mediasite_basiclti_view($instance, $siteid, $typeconfig, $endpoint, $ar
     } else {
         $content = mediasite_post_launch_html($parms, $endpoint, $debuglaunch, false);
     }
+
     print $content;
 }
 
@@ -78,7 +81,7 @@ function mediasite_basiclti_view($instance, $siteid, $typeconfig, $endpoint, $ar
  *
  * @return array    $request        Request details
  */
-function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollments) {
+function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arrayofenrollments, $arrayofcustomparameters) {
     global $USER, $CFG;
 
     $context = context_system::instance();
@@ -100,7 +103,8 @@ function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arra
         "context_label" => $course->shortname,
         "context_title" => $course->fullname,
         "launch_presentation_locale" => $locale,
-        "launch_presentation_document_target" => $instance->launchinpopup == 0 ? "iframe" : "window"
+        "launch_presentation_document_target" => $instance->launchinpopup == 0 ? "iframe" : "window",
+        "lis_course_section_sourcedid" => $course->idnumber
     );
 
     $placementsecret = $typeconfig->lti_consumer_secret;
@@ -120,7 +124,6 @@ function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arra
         $requestparams['context_type'] = 'Group';
     } else {
         $requestparams['context_type'] = 'CourseSection';
-        $requestparams['lis_course_section_sourcedid'] = $course->idnumber;
     }
 
     // Concatenate the custom parameters from the administrator and the instructor
@@ -153,6 +156,11 @@ function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arra
     // all the enrollment information for this user.
     if ($arrayofenrollments != null) {
         $mediasiteintegration['custom_mediasite_roles'] = implode(',', $arrayofenrollments);
+    }
+    if ($arrayofcustomparameters != null) {
+        foreach ($arrayofcustomparameters as $param) {
+            $mediasiteintegration['custom_mediasite_' . $param->getkey()] = $param->getvalue();
+        }
     }
     $requestparams = array_merge($mediasiteintegration, $requestparams);
 
@@ -243,7 +251,7 @@ function mediasite_basiclti_get_ims_role($user, $context) {
 function mediasite_basiclti_get_type_config($siteid) {
     global $DB;
 
-    $config = $DB->get_record('mediasite_sites', array('id' => $siteid), $fields = '*', $strictness = MUST_EXIST);
+    $config = $DB->get_record('mediasite_sites', array('id' => $siteid));
     return $config;
 }
 

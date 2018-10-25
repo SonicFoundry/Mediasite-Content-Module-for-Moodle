@@ -33,6 +33,7 @@ require_once("$CFG->dirroot/mod/mediasite/mediasitesite.php");
 class mod_mediasite_site_form extends \moodleform {
     private $sitetoedit = null;
     private $navinstalled = null;
+    private $attoinstalled = null;
     public function __construct(Sonicfoundry\MediasiteSite $site = null) {
         $this->sitetoedit = $site;
         parent::__construct();
@@ -42,10 +43,12 @@ class mod_mediasite_site_form extends \moodleform {
         $mform    =& $this->_form;
         $maxbytes = 100000;
         $this->navinstalled = $this->is_navigation_installed();
+        $this->attoinstalled = $this->is_atto_installed();
 
         $mymediasiteplacementoptions = array(
             mediasite_menu_placement::SITE_PAGES => get_string('my_mediasite_site_pages', 'mediasite'),
-            mediasite_menu_placement::COURSE_MENU => get_string('my_mediasite_course_menu', 'mediasite')
+            mediasite_menu_placement::COURSE_MENU => get_string('my_mediasite_course_menu', 'mediasite'),
+            mediasite_menu_placement::INPAGE_MENU => get_string('my_mediasite_inpage_menu', 'mediasite'),
         );
 
         if ($CFG->version >= 2015051100) {
@@ -256,6 +259,25 @@ class mod_mediasite_site_form extends \moodleform {
             );
         }
 
+        $mform->addElement('header', 'assignment_submission_header', get_string('assignment_submission_header', 'mediasite'));
+
+        if ($this->attoinstalled) {
+            $mform->addElement(
+                'select',
+                'show_assignment_submission',
+                get_string('show_assignment_submission', 'mediasite'),
+                $mediasite7coursesmodes
+            );
+            $mform->setType('show_assignment_submission', PARAM_INT);
+        } else {
+            $mform->addElement(
+                'static',
+                'assignment_submission_not_enabled',
+                get_string('feature_not_enabled', 'mediasite'),
+                get_string('assignment_submission_not_enabled', 'mediasite')
+            );
+        }
+
         $mform->closeHeaderBefore('lti_debug_launch');
 
         $mform->addElement(
@@ -299,6 +321,9 @@ class mod_mediasite_site_form extends \moodleform {
                 $mform->setDefault('my_mediasite_placement', $this->sitetoedit->get_my_mediasite_placement());
                 $mform->setDefault('openaspopup_my_mediasite', $this->sitetoedit->get_openaspopup_my_mediasite());
             }
+            if ($this->attoinstalled) {
+                $mform->setDefault('show_assignment_submission', $this->sitetoedit->get_show_assignment_submission());
+            }
             $mform->setDefault('lti_debug_launch', $this->sitetoedit->get_lti_debug_launch());
             $mform->setDefault('lti_embed_type_thumbnail', $this->sitetoedit->get_lti_embed_type_thumbnail());
             $mform->setDefault('lti_embed_type_abstract_only', $this->sitetoedit->get_lti_embed_type_abstract_only());
@@ -319,6 +344,7 @@ class mod_mediasite_site_form extends \moodleform {
 
         $errors = parent::validation($data, $files);
         $this->navinstalled = $this->is_navigation_installed();
+        $this->attoinstalled = $this->is_atto_installed();
 
         if (isset($data['sitename']) && strlen($data['sitename']) > 0) {
             if (strlen($data['sitename']) > 254) {
@@ -412,6 +438,10 @@ class mod_mediasite_site_form extends \moodleform {
 
     public function is_navigation_installed() {
         return mediasite_is_local_mediasite_courses_installed();
+    }
+
+    public function is_atto_installed() {
+        return mediasite_is_atto_mediasitebutton_installed();
     }
 
     public function is_url_reachable($url) {
