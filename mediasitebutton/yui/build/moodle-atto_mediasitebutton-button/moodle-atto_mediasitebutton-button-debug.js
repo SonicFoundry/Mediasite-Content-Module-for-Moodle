@@ -54,11 +54,11 @@ var EMBEDBUTTONCLICKED = false;
 var DIVID = 'atto_mediasitebutton';
 var IFRAME_TEMPLATE = '<div id="{{element_id}}_instruction_div" class="mediasite-instruction alert alert-info alert-block fade in" style="color: #0149bc;"><div><h2>{{instruction_title}}</h2><p>~~INSTRUCTIONAL_TEXT~~</p></div><button id="{{element_id}}_button_continue" class="mediasitebutton_continue btn btn-primary">{{continue}}</button></div>' +
                       '<div id="{{element_id}}_iframe_div">' + 
-                      '<button id="{{element_id}}_button_top" class="mediasitebutton_submit btn btn-warning" style="margin: 0 0 12px 20px">{{insert}}</button>' +
+                      '<button id="{{element_id}}_button_top" class="mediasitebutton_submit btn btn-success" style="margin: 0 0 12px 20px; background-color: green;">{{insert}}</button>' +
                       '<div id="{{element_id}}_div" class="mdl-align">' +
                       '<iframe id="{{element_id}}_iframe" src="{{launch_url}}" height="{{height}}" width="{{width}}" scrolling="auto"></iframe>' +
                       '</div>' +
-                      '<button id="{{element_id}}_button_bottom" class="mediasitebutton_submit btn btn-warning" style="margin: 0 0 12px 20px">{{insert}}</button>' +
+                      '<button id="{{element_id}}_button_bottom" class="mediasitebutton_submit btn btn-success" style="margin: 0 0 12px 20px; background-color: green;">{{insert}}</button>' +
                       '</div>';
 var SUBMISSION_TEMPLATE = '<div style="padding: 8px; background-color: white;">' + 
     '<div style="width: 100%; margin-bottom: 8px;"><a href="~~LAUNCHURL~~" target="_blank" />' +

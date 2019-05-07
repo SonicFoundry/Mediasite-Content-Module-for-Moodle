@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 $plugin->component = 'mod_mediasite';
-$plugin->version = 2018102300;
+$plugin->version = 2019050600;
 $plugin->release = 'v7.0';
 $plugin->requires = 2016052308.00;
 $plugin->maturity = MATURITY_STABLE; // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC or MATURITY_STABLE.

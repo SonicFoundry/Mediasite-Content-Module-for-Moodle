@@ -95,8 +95,6 @@ function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arra
     $instance->launchinpopup = 0;
 
     $requestparams = array(
-        "resource_link_id" => $instance->id,
-        "resource_link_title" => $instance->shortname,
         "user_id" => $USER->id,
         "roles" => $role,
         "context_id" => $course->id,
@@ -107,12 +105,31 @@ function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arra
         "lis_course_section_sourcedid" => $course->idnumber
     );
 
-    $placementsecret = $typeconfig->lti_consumer_secret;
-    if ( isset($placementsecret) ) {
-        $suffix = ':::' . $USER->id . ':::' . $instance->id;
-        $plaintext = $placementsecret . $suffix;
-        $hashsig = hash('sha256', $plaintext, false);
-        $sourcedid = $hashsig . $suffix;
+    if (!empty($USER->idnumber)) {
+        $requestparams['lis_person_sourcedid'] = $USER->idnumber;
+    }
+    if (!empty($instance->name)) {
+        $requestparams['resource_link_title'] = trim(html_to_text($instance->name, 0));
+    }
+    if (!empty($instance->cmid)) {
+        $intro = format_module_intro('lti', $instance, $instance->cmid);
+        $intro = trim(html_to_text($intro, 0, false));
+
+        // This may look weird, but this is required for new lines
+        // so we generate the same OAuth signature as the tool provider.
+        $intro = str_replace("\n", "\r\n", $intro);
+        $requestparams['resource_link_description'] = $intro;
+    }
+    if (!empty($instance->id)) {
+        $requestparams['resource_link_id'] = $instance->id;
+    }
+    if (!empty($instance->resource_link_id)) {
+        $requestparams['resource_link_id'] = $instance->resource_link_id;
+    }
+    if ($course->format == 'site') {
+        $requestparams['context_type'] = 'Group';
+    } else {
+        $requestparams['context_type'] = 'CourseSection';
     }
 
     $requestparams["lis_person_name_given"] = $USER->firstname;
@@ -120,10 +137,12 @@ function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arra
     $requestparams["lis_person_name_full"] = $USER->firstname." ".$USER->lastname;
     $requestparams["lis_person_contact_email_primary"] = $USER->email;
 
-    if ($course->format == 'site') {
-        $requestparams['context_type'] = 'Group';
-    } else {
-        $requestparams['context_type'] = 'CourseSection';
+    $placementsecret = $typeconfig->lti_consumer_secret;
+    if ( isset($placementsecret) ) {
+        $suffix = ':::' . $USER->id . ':::' . $instance->id;
+        $plaintext = $placementsecret . $suffix;
+        $hashsig = hash('sha256', $plaintext, false);
+        $sourcedid = $hashsig . $suffix;
     }
 
     // Concatenate the custom parameters from the administrator and the instructor
@@ -327,7 +346,7 @@ function mediasite_basiclti_get_type_config_from_instance($id) {
  * @param $orgdesc     LMS key
  */
 function mediasite_sign_parameters($oldparms, $endpoint, $method, $oauthconsumerkey, $oauthconsumersecret, $submittext, $orgid) {
-    global $lastbasestring;
+    global $lastbasestring, $CFG;
     $parms = $oldparms;
     $parms["lti_version"] = "LTI-1p0";
     $parms["lti_message_type"] = "basic-lti-launch-request";
@@ -336,8 +355,14 @@ function mediasite_sign_parameters($oldparms, $endpoint, $method, $oauthconsumer
     }
     $parms["ext_submit"] = $submittext;
 
-    $testtoken = '';
+    if (!empty($CFG->mod_lti_institution_name)) {
+        $parms['tool_consumer_instance_name'] = trim(html_to_text($CFG->mod_lti_institution_name, 0));
+    } else {
+        $parms['tool_consumer_instance_name'] = get_site()->shortname;
+    }
+    $parms['tool_consumer_instance_description'] = trim(html_to_text(get_site()->fullname, 0));
 
+    $testtoken = '';
     $hmacmethod = new MediasiteOAuthSignatureMethod_HMAC_SHA1();
     $testconsumer = new MediasiteOAuthConsumer($oauthconsumerkey, $oauthconsumersecret, null);
 
@@ -489,4 +514,50 @@ function mediasite_get_current_url() {
         $request . (empty($query) ? '' : '?' . $query);
 
     return $toret;
+}
+
+function mediasite_ensure_url_is_https($url) {
+    if (!strstr($url, '://')) {
+        $url = 'https://' . $url;
+    } else {
+        // If the URL starts with http, replace with https.
+        if (stripos($url, 'http://') === 0) {
+            $url = 'https://' . substr($url, 7);
+        }
+    }
+
+    return $url;
+}
+
+/**
+ * Build source ID
+ *
+ * @param int $instanceid
+ * @param int $userid
+ * @param string $servicesalt
+ * @param null|int $typeid
+ * @param null|int $launchid
+ * @return stdClass
+ */
+function mediasite_build_sourcedid($instanceid, $userid, $servicesalt, $typeid = null, $launchid = null) {
+    $data = new \stdClass();
+
+    $data->instanceid = $instanceid;
+    $data->userid = $userid;
+    $data->typeid = $typeid;
+    if (!empty($launchid)) {
+        $data->launchid = $launchid;
+    } else {
+        $data->launchid = mt_rand();
+    }
+
+    $json = json_encode($data);
+
+    $hash = hash('sha256', $json . $servicesalt, false);
+
+    $container = new \stdClass();
+    $container->data = $data;
+    $container->hash = $hash;
+
+    return $container;
 }

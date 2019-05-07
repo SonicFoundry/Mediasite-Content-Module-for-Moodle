@@ -247,7 +247,7 @@ function render_mediasite_presentation_metadata($mediasite, $coursemodule, $lti)
                       'src' => generate_mediasite_presentation_thumbnail_url($mediasite, $lti)));
         }
     }
-    if (isset($mediasite->recorddateutc) && !is_null($mediasite->recorddateutc)) {
+    if (isset($mediasite->recorddateutc) && !is_null($mediasite->recorddateutc) && $mediasite->recorddateutc > 0) {
         $content .= html_writer::tag(
             'span',
             userdate($mediasite->recorddateutc,
