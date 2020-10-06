@@ -17,15 +17,15 @@
 /**
  * Mediasite plugin for Moodle.
  *
- * @package local_mediasite_courses
+ * @package assignsubmission_mediasite
  * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-$string['mediasite_courses'] = 'Mediasite 7 Courses';
-$string['modulename'] = 'Mediasite 7 Courses';
-$string['modulenameplural'] = 'Mediasite 7 Courses';
-$string['pluginname'] = 'Mediasite 7 Courses';
-$string['privacy:metadata'] = 'The Mediasite Courses plugin only displays existing Mediasite data.';
+// Mediasite assignment is ON by default.
+$settings->add(new admin_setting_configcheckbox('assignsubmission_mediasite/default',
+                    new lang_string('default', 'assignsubmission_mediasite'),
+                    new lang_string('default_help', 'assignsubmission_mediasite'),
+                    1));

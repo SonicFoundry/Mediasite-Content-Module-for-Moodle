@@ -34,6 +34,8 @@ class mod_mediasite_site_form extends \moodleform {
     private $sitetoedit = null;
     private $navinstalled = null;
     private $attoinstalled = null;
+    private $assignsubmissioninstalled = null;
+
     public function __construct(Sonicfoundry\MediasiteSite $site = null) {
         $this->sitetoedit = $site;
         parent::__construct();
@@ -43,7 +45,7 @@ class mod_mediasite_site_form extends \moodleform {
         $mform    =& $this->_form;
         $maxbytes = 100000;
         $this->navinstalled = $this->is_navigation_installed();
-        $this->attoinstalled = $this->is_atto_installed();
+        $this->assignsubmissioninstalled = $this->is_assign_submission_installed();
 
         $mymediasiteplacementoptions = array(
             mediasite_menu_placement::SITE_PAGES => get_string('my_mediasite_site_pages', 'mediasite'),
@@ -64,6 +66,7 @@ class mod_mediasite_site_form extends \moodleform {
                 3 => get_string('Always', 'mediasite')
             );
         }
+
         $mform->addElement('html', '<h2>'.get_string('mediasite_server_list', 'mediasite').'</h2>');
 
         $mform->addElement('text', 'sitename', get_string('sitename', 'mediasite'), array('class' => 'sofo-site-name'));
@@ -261,14 +264,13 @@ class mod_mediasite_site_form extends \moodleform {
 
         $mform->addElement('header', 'assignment_submission_header', get_string('assignment_submission_header', 'mediasite'));
 
-        if ($this->attoinstalled) {
+        if ($this->assignsubmissioninstalled) {
             $mform->addElement(
-                'select',
-                'show_assignment_submission',
-                get_string('show_assignment_submission', 'mediasite'),
-                $mediasite7coursesmodes
+                'static',
+                'assignment_submission_plugin_installed',
+                get_string('feature_installed', 'mediasite'),
+                get_string('assignment_submission_plugin_installed', 'mediasite')
             );
-            $mform->setType('show_assignment_submission', PARAM_INT);
         } else {
             $mform->addElement(
                 'static',
@@ -278,7 +280,7 @@ class mod_mediasite_site_form extends \moodleform {
             );
         }
 
-        $mform->closeHeaderBefore('lti_debug_launch');
+        $mform->addElement('header', 'advanced_header', get_string('advanced_header', 'mediasite'));
 
         $mform->addElement(
             'advcheckbox',
@@ -289,6 +291,19 @@ class mod_mediasite_site_form extends \moodleform {
             array(0, 1)
         );
         $mform->setType('lti_debug_launch', PARAM_INT);
+
+        $mform->addElement(
+            'text',
+            'sitecustom_integration_callback',
+            get_string('custom_integration_callback', 'mediasite'),
+            array('class' => 'sofo-custom_integration_callback')
+        );
+        $mform->setType('sitecustom_integration_callback', PARAM_TEXT);
+
+        $mform->addElement('static', 'custom_integration_callback_field_description',
+            '<a href="../../../admin/phpinfo.php" target="_blank">Show PHP info</a>',
+            get_string('custom_integration_callback_field_description', 'mediasite'));
+        $mform->setType('custom_integration_callback_field_description', PARAM_TEXT);
 
         if (is_null($this->sitetoedit)) {
             $mform->addElement('hidden', 'site', 0);
@@ -321,9 +336,6 @@ class mod_mediasite_site_form extends \moodleform {
                 $mform->setDefault('my_mediasite_placement', $this->sitetoedit->get_my_mediasite_placement());
                 $mform->setDefault('openaspopup_my_mediasite', $this->sitetoedit->get_openaspopup_my_mediasite());
             }
-            if ($this->attoinstalled) {
-                $mform->setDefault('show_assignment_submission', $this->sitetoedit->get_show_assignment_submission());
-            }
             $mform->setDefault('lti_debug_launch', $this->sitetoedit->get_lti_debug_launch());
             $mform->setDefault('lti_embed_type_thumbnail', $this->sitetoedit->get_lti_embed_type_thumbnail());
             $mform->setDefault('lti_embed_type_abstract_only', $this->sitetoedit->get_lti_embed_type_abstract_only());
@@ -332,6 +344,7 @@ class mod_mediasite_site_form extends \moodleform {
             $mform->setDefault('lti_embed_type_embed', $this->sitetoedit->get_lti_embed_type_embed());
             $mform->setDefault('lti_embed_type_presentation_link', $this->sitetoedit->get_lti_embed_type_presentation_link());
             $mform->setDefault('lti_embed_type_player_only', $this->sitetoedit->get_lti_embed_type_player_only());
+            $mform->setDefault('sitecustom_integration_callback', $this->sitetoedit->get_custom_integration_callback());
 
             $mform->addElement('hidden', 'site', $this->sitetoedit->get_siteid());
             $mform->setType('site', PARAM_INT);
@@ -344,7 +357,7 @@ class mod_mediasite_site_form extends \moodleform {
 
         $errors = parent::validation($data, $files);
         $this->navinstalled = $this->is_navigation_installed();
-        $this->attoinstalled = $this->is_atto_installed();
+        $this->assignsubmissioninstalled = $this->is_assign_submission_installed();
 
         if (isset($data['sitename']) && strlen($data['sitename']) > 0) {
             if (strlen($data['sitename']) > 254) {
@@ -442,6 +455,10 @@ class mod_mediasite_site_form extends \moodleform {
 
     public function is_atto_installed() {
         return mediasite_is_atto_mediasitebutton_installed();
+    }
+
+    public function is_assign_submission_installed() {
+        return mediasite_is_assign_submission_installed();
     }
 
     public function is_url_reachable($url) {

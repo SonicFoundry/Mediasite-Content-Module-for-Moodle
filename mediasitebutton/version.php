@@ -27,8 +27,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'atto_mediasitebutton';
-$plugin->version = 2019050600;
-$plugin->requires = 2016052308.00;
+$plugin->version = 2020082700;
+$plugin->requires = 2019052000;
 $plugin->dependencies = array(
-    'mod_mediasite' => 2019050600
+    'mod_mediasite' => 2020082700
 );

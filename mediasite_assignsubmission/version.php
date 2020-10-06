@@ -17,10 +17,16 @@
 /**
  * Mediasite plugin for Moodle.
  *
- * @package local_mediasite_courses
+ * @package assign_mediasite
  * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
+$plugin->component = 'assignsubmission_mediasite';
+$plugin->version = 2020082700;
+$plugin->requires = 2019052000;
+$plugin->dependencies = array(
+    'mod_mediasite' => 2020082700
+);

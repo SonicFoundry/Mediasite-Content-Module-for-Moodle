@@ -46,6 +46,7 @@
         <FIELD NAME="lti_debug_launch" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="embed_formats" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="31" SEQUENCE="false"/>
         <FIELD NAME="show_assignment_submission" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="custom_integration_callback" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>      
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

@@ -22,12 +22,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die;
+
 $plugin->component = 'local_mediasite_courses';
-$plugin->version = 2019050600;
+$plugin->version = 2020082700;
 $plugin->release = 'v7.0';
-$plugin->requires = 2016052308.00;
-$plugin->maturity = MATURITY_STABLE; // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC or MATURITY_STABLE.
+$plugin->requires = 2019052000;
+$plugin->maturity = MATURITY_STABLE;
 $plugin->cron = 0;
 $plugin->dependencies = array(
-    'mod_mediasite' => 2019050600
+    'mod_mediasite' => 2020082700
 );

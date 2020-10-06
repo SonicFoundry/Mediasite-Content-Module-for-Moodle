@@ -522,6 +522,14 @@ function mediasite_upgrade_from_2017020100($oldversion, $dbman, $plugin) {
     conditionally_add_field_to_table($coursetable, $coursefield, $dbman);
 }
 
+function mediasite_upgrade_from_2018062201($oldversion, $dbman, $plugin) {
+    $sitestable = new \xmldb_table('mediasite_sites');
+    $sitesfield = new \xmldb_field('custom_integration_callback', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+
+    // Conditionally launch add field custom_integration_callback.
+    conditionally_add_field_to_table($sitestable, $sitesfield, $dbman);
+}
+
 function conditionally_add_field_to_table($table, $field, $dbman) {
     // Conditionally launch add field intro.
     if (!$dbman->field_exists($table, $field)) {

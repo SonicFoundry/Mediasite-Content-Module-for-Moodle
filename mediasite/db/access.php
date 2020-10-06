@@ -36,9 +36,8 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
     'mod/mediasite:view' => array (
-        'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
         'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
+        'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array (
             'student' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,

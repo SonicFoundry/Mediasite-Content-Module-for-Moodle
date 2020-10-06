@@ -46,6 +46,12 @@ if ($resourceid != '') {
     if ($courseid > 0) {
         $course = $DB->get_record("course", array("id" => $courseid));
         require_login($course);
+
+        // Mark this activity as complete.
+        $cm = $DB->get_record("course_modules", array("id" => $id));
+        $completion = new completion_info($course);
+        $completion->set_module_viewed($cm);
+
         mediasite_basiclti_mediasite_view($course, $siteid, $endpoint, $resourceid);
     } else {
         print_error(get_string('error_course_misconfigured', 'mediasite'));
@@ -74,11 +80,10 @@ if ($resourceid != '') {
 
     require_login($course);
 
-    if ($resourceid == '') {
-        mediasite_basiclti_mediasite_view($course, $mediasite->siteid, $endpoint,
-            mediasite_guid_to_muid($mediasite->resourceid, $mediasite->resourcetype));
-    } else {
-        mediasite_basiclti_mediasite_view($course, $mediasite->siteid, $endpoint,
-            mediasite_guid_to_muid($mediasite->resourceid, $mediasite->resourcetype));
-    }
+    // Mark this activity as complete.
+    $completion = new completion_info($course);
+    $completion->set_module_viewed($cm);
+
+    mediasite_basiclti_mediasite_view($course, $mediasite->siteid, $endpoint,
+        mediasite_guid_to_muid($mediasite->resourceid, $mediasite->resourcetype));
 }

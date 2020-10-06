@@ -158,7 +158,8 @@ function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arra
     // The LTI app will look for the following specific custom_mediasite_integration_* attributes
     // in the LTI POST and configure the LTI Search app accordingly.
     $mediasiteintegration = array();
-    $mediasiteintegration['custom_mediasite_integration_callback'] = mediasite_get_current_url();
+    $mediasiteintegration['custom_mediasite_integration_callback']
+        = mediasite_get_current_url($typeconfig->custom_integration_callback);
 
     $mediasiteembedformats = array();
     $site = new Sonicfoundry\MediasiteSite($typeconfig);
@@ -179,6 +180,13 @@ function mediasite_basiclti_build_request($instance, $typeconfig, $course, $arra
     if ($arrayofcustomparameters != null) {
         foreach ($arrayofcustomparameters as $param) {
             $mediasiteintegration['custom_mediasite_' . $param->getkey()] = $param->getvalue();
+
+            // For assignment submission scenario, "lis_course_section_sourcedid" may empty from $PAGE->course->idnumber. Set this value to custom parameter "courseidnumber" instead.
+            if($param->getkey() == "courseidnumber") {
+                if(empty($requestparams["lis_course_section_sourcedid"])) {
+                    $requestparams["lis_course_section_sourcedid"] = $param->getvalue();
+                }
+            }
         }
     }
     $requestparams = array_merge($mediasiteintegration, $requestparams);
@@ -246,10 +254,10 @@ function mediasite_basiclti_get_ims_role($user, $context) {
     $roles = get_user_roles($context, $user->id);
     $rolesname = array();
     foreach ($roles as $role) {
-        $rolesname[] = $role->shortname;
+        $rolesname[] = $role->shortname; 
     }
 
-    if (in_array('admin', $rolesname) || in_array('coursecreator', $rolesname)) {
+    if (in_array('admin', $rolesname) || in_array('coursecreator', $rolesname) || in_array('manager', $rolesname)) {
         return 'Instructor,Administrator';
     }
 
@@ -494,26 +502,46 @@ function mediasite_copyof_lti_get_ims_role($user, $cmid, $courseid, $islti2) {
     return join(',', $roles);
 }
 
-function mediasite_get_current_url() {
+function mediasite_get_current_url($customintegrationcallback) {
+    $phpserverport = $_SERVER['SERVER_PORT'];
+    $phphttps = $_SERVER['HTTPS'];
+    $phphttphost = $_SERVER['HTTP_HOST'];
+    $phpself = $_SERVER['PHP_SELF'];
 
-    $protocol = 'http';
-    if ($_SERVER['SERVER_PORT'] == 443 || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')) {
-        $protocol .= 's';
-        $protocolport = $_SERVER['SERVER_PORT'];
+    $protocol = "http";
+    $specialport = "";
+    if ($phphttps == "on") {
+        $protocol = "https";
+        if ($phpserverport !== 443) {
+            $specialport = $phpserverport;
+        }
     } else {
-        $protocolport = 80;
+        if ($phpserverport !== 80) {
+            $specialport = $phpserverport;
+        }
     }
 
-    $host = $_SERVER['HTTP_HOST'];
-    $port = $_SERVER['SERVER_PORT'];
-    $request = $_SERVER['PHP_SELF'];
+    $host = $phphttphost;
+
+    // If settings "custom_integration_callback" is not null or empty.
+    if (isset($customintegrationcallback) && trim($customintegrationcallback) !== '') {
+        $customcallbackurl = $_SERVER[$customintegrationcallback];
+        if (strlen($customcallbackurl) > 0) {
+            $host = $customcallbackurl;
+        }
+    }
+
+    $url = $protocol . "://";
+    if ($specialport === "" || ($specialport !== "" && stripos($host, strval($specialport)) !== false)) {
+        $url .= $host;
+    } else {
+        $url .= $host . ":" . $specialport;
+    }
+
+    $request = $phpself;
     $query = isset($_SERVER['argv']) ? substr($_SERVER['argv'][0], strpos($_SERVER['argv'][0], ';') + 1) : '';
 
-    $toret = $protocol . '://' . $host .
-        ($port == $protocolport ? '' : ':' . $port) .
-        $request . (empty($query) ? '' : '?' . $query);
-
-    return $toret;
+    return $url . $request . $query;
 }
 
 function mediasite_ensure_url_is_https($url) {

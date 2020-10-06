@@ -57,7 +57,6 @@ if ($mform->is_cancelled()) {
 $data = $mform->get_data();
 if ($data) {
     $navinstalled = $mform->is_navigation_installed();
-    $attoinstalled = $mform->is_atto_installed();
     $site->set_sitename($data->sitename);
     $site->set_endpoint($data->siteurl);
     $site->set_lti_consumer_key($data->sitelti_consumer_key);
@@ -72,9 +71,6 @@ if ($data) {
         $site->set_my_mediasite_placement($data->my_mediasite_placement);
         $site->set_openaspopup_my_mediasite($data->openaspopup_my_mediasite);
     }
-    if ($attoinstalled) {
-        $site->set_show_assignment_submission($data->show_assignment_submission);
-    }
     $site->set_lti_debug_launch($data->lti_debug_launch);
     $site->set_lti_embed_type_thumbnail($data->lti_embed_type_thumbnail);
     $site->set_lti_embed_type_abstract_only($data->lti_embed_type_abstract_only);
@@ -83,6 +79,7 @@ if ($data) {
     $site->set_lti_embed_type_embed($data->lti_embed_type_embed);
     $site->set_lti_embed_type_presentation_link($data->lti_embed_type_presentation_link);
     $site->set_lti_embed_type_player_only($data->lti_embed_type_player_only);
+    $site->set_custom_integration_callback($data->sitecustom_integration_callback);
 
     $lastchar = substr($site->get_endpoint(), -1);
     if (strcmp($lastchar, '/') === 0) {

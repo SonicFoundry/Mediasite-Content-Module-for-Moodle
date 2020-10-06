@@ -54,18 +54,11 @@ function atto_mediasitebutton_params_for_js() {
 
     $coursecontext = context_course::instance($COURSE->id);
 
-    $isassignment = atto_mediasitebutton_is_assignment();
+    // $isassignment = atto_mediasitebutton_is_assignment();
+    $isassignment = false;
     $mediasitesite = atto_mediasitebutton_get_mediasite_site($COURSE->id);
-
-    $enabled = false;
-    if ($isassignment) {
-        $isassignmentsubmissionenabled = atto_mediasitebutton_is_assignment_submission_enabled($COURSE->id, $mediasitesite);
-        if ($isassignmentsubmissionenabled) {
-            $enabled = has_capability('atto/mediasitebutton:assignment', $coursecontext);
-        }
-    } else {
-        $enabled = has_capability('atto/mediasitebutton:editor', $coursecontext);
-    }
+    
+    $enabled = has_capability('atto/mediasitebutton:editor', $coursecontext);
     
     $launchurl = base64_encode(new moodle_url('/mod/mediasite/upload_launch.php', array('id' => $id, 'isassignment' => $isassignment, 'siteid' => $mediasitesite->id)));
     $assignmentlaunchurl = base64_encode(new moodle_url('/mod/mediasite/assignment_launch.php', array('id' => $id, 'coursecontext' => $coursecontext->id, 'course' => $COURSE->id, 'siteid' => $mediasitesite->id, 'resourceid' => '##ID##')));

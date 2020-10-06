@@ -17,15 +17,19 @@
 /**
  * Mediasite plugin for Moodle.
  *
- * @package local_mediasite_courses
+ * @package assignsubmission_mediasite
  * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-$string['mediasite_courses'] = 'Mediasite 7 Courses';
-$string['modulename'] = 'Mediasite 7 Courses';
-$string['modulenameplural'] = 'Mediasite 7 Courses';
-$string['pluginname'] = 'Mediasite 7 Courses';
-$string['privacy:metadata'] = 'The Mediasite Courses plugin only displays existing Mediasite data.';
+$string['default'] = 'Enable by default';
+$string['default_help'] = 'If set, this submission method will be enabled by default for all new assignments.';
+$string['emptycontenterrormessage'] = 'No video submission found.';
+$string['enabled'] = 'Mediasite Content(for enabled)';
+$string['enabled_help'] = "If enabled, students are able to submit Mediasite Content for assessment in Moodle.";
+$string['launchbuttontext'] = 'Upload Media';
+$string['numwordsforlog'] = 'Submission word count: {$a} words';
+$string['pluginname'] = 'Mediasite Assignment Submission';
+$string['privacy:metadata'] = 'The Mediasite assignment submission plugin only displays existing Mediasite data.';
+$string['submissiontext'] = 'Video Submission';
+$string['submissiontype'] = 'Video Assignment';

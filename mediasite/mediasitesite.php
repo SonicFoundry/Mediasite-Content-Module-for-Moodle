@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 class Mediasitecontenttypes {
     const PRESENTATION = 'Presentation';
     const CATALOG = 'CatalogFolderDetails';
+    const CHANNEL = 'MediasiteChannel';
 }
 class MediasiteEmbedFormatValues {
     const THUMBNAIL = 1;
@@ -84,6 +85,7 @@ class MediasiteSite {
     private $mymediasiteplacement;
     private $openaspopupmymediasite;
     private $embedformats;
+    private $customintegrationcallback;
 
     public function __construct($record = null) {
         if (!is_null($record)) {
@@ -104,6 +106,7 @@ class MediasiteSite {
                 $this->mymediasiteplacement = $record->my_mediasite_placement;
                 $this->openaspopupmymediasite = $record->openaspopup_my_mediasite;
                 $this->ltidebuglaunch = $record->lti_debug_launch;
+                $this->customintegrationcallback = $record->custom_integration_callback;
             } else if ($record instanceof \stdClass) {
                 $this->id = $record->id;
                 $this->sitename = $record->sitename;
@@ -121,6 +124,7 @@ class MediasiteSite {
                 $this->mymediasiteplacement = $record->my_mediasite_placement;
                 $this->openaspopupmymediasite = $record->openaspopup_my_mediasite;
                 $this->ltidebuglaunch = $record->lti_debug_launch;
+                $this->customintegrationcallback = $record->custom_integration_callback;
             } else if (is_numeric($record)) {
                 global $DB;
                 $record = $DB->get_record('mediasite_sites', array('id' => $record));
@@ -141,6 +145,7 @@ class MediasiteSite {
                     $this->mymediasiteplacement = $record->my_mediasite_placement;
                     $this->openaspopupmymediasite = $record->openaspopup_my_mediasite;
                     $this->ltidebuglaunch = $record->lti_debug_launch;
+                    $this->customintegrationcallback = $record->custom_integration_callback;
                 }
             }
         }
@@ -163,6 +168,7 @@ class MediasiteSite {
         $record->my_mediasite_placement = $this->mymediasiteplacement;
         $record->openaspopup_my_mediasite = $this->openaspopupmymediasite;
         $record->lti_debug_launch = $this->ltidebuglaunch;
+        $record->custom_integration_callback = $this->customintegrationcallback;
 
         global $DB;
         $DB->update_record('mediasite_sites', $record);
@@ -228,6 +234,24 @@ class MediasiteSite {
             ($contenttypefilter == null || $contenttypefilter == Mediasitecontenttypes::CATALOG)) {
             $result[] = new MediasiteEmbedFormat(
                 Mediasitecontenttypes::CATALOG,
+                MediasiteEmbedFormatValues::EMBED,
+                MediasiteEmbedFormatTypes::EMBED,
+                $this->embedformats & MediasiteEmbedFormatValues::EMBED
+            );
+        }
+        if (($includedisabled || $this->embedformats & MediasiteEmbedFormatValues::LINK) &&
+            ($contenttypefilter == null || $contenttypefilter == Mediasitecontenttypes::CHANNEL)) {
+            $result[] = new MediasiteEmbedFormat(
+                Mediasitecontenttypes::CHANNEL,
+                MediasiteEmbedFormatValues::LINK,
+                MediasiteEmbedFormatTypes::LINK,
+                $this->embedformats & MediasiteEmbedFormatValues::LINK
+            );
+        }
+        if (($includedisabled || $this->embedformats & MediasiteEmbedFormatValues::EMBED) &&
+            ($contenttypefilter == null || $contenttypefilter == Mediasitecontenttypes::CHANNEL)) {
+            $result[] = new MediasiteEmbedFormat(
+                Mediasitecontenttypes::CHANNEL,
                 MediasiteEmbedFormatValues::EMBED,
                 MediasiteEmbedFormatTypes::EMBED,
                 $this->embedformats & MediasiteEmbedFormatValues::EMBED
@@ -364,7 +388,6 @@ class MediasiteSite {
     public function set_lti_embed_type_player_only($value) {
         $this->set_lti_embed_type_bitmask($value, MediasiteEmbedFormatValues::PLAYER_ONLY);
     }
-
     public function set_lti_embed_type_bitmask($value, $bit) {
         if ($value == 0) {
             $this->embedformats = $this->embedformats & ~$bit;
@@ -372,7 +395,12 @@ class MediasiteSite {
             $this->embedformats = $this->embedformats | $bit;
         }
     }
-
+    public function get_custom_integration_callback() {
+        return $this->customintegrationcallback;
+    }
+    public function set_custom_integration_callback($value) {
+        $this->customintegrationcallback = $value;
+    }
 
     public static function loadbyname($name) {
         global $DB;

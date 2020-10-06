@@ -49,7 +49,6 @@ function mediasite_basiclti_mediasite_view(
     $endpointtype,
     $mediasiteid = null,
     $arrayofcustomparameters = null) {
-    global $USER;
 
     $typeconfig = mediasite_basiclti_get_type_config($siteid);
     $endpoint = $typeconfig->endpoint;
@@ -113,25 +112,61 @@ function mediasite_basiclti_mediasite_view(
     mediasite_basiclti_view($instance, $siteid, $typeconfig, $endpoint, $roles, $arrayofcustomparameters);
 }
 
+// We do not use build-in function "get_user_roles" to avoid DB calls inside a loop.
+// Rewrite this function based on source code of "get_user_roles": https://github.com/moodle/moodle/blob/master/lib/accesslib.php .
 function mediasite_get_all_enrollments() {
     global $DB, $USER;
 
     $allenrollments = array();
 
     $selectenrolledcourses = '
-        SELECT DISTINCT c.id, c.shortname, c.idnumber
-          FROM {user} u
+        SELECT DISTINCT c.id as courseid, ct.id as contextid
+            FROM {user} u
                INNER JOIN {role_assignments} ra ON ra.userid = u.id
                INNER JOIN {context} ct ON ct.id = ra.contextid
                INNER JOIN {course} c ON c.id = ct.instanceid
-         WHERE u.id = ?';
-    $courseids = $DB->get_records_sql($selectenrolledcourses, array($USER->id));
-
-    foreach ($courseids as $courseid) {
-        $context = context_course::instance($courseid->id);
-        $role = mediasite_basiclti_get_ims_role($USER, $context);
-        array_push($allenrollments, mediasite_get_mediasite_formatted_role($role, $courseid->shortname));
+            WHERE u.id = ?';
+    $coursesandcontextsinfo = $DB->get_records_sql($selectenrolledcourses, array($USER->id));
+    if ($coursesandcontextsinfo == null) {
+        return $allenrollments;
     }
+
+    $coursecontextids = array();
+    foreach ($coursesandcontextsinfo as $ccinfo) {
+        $coursecontext = context_course::instance($ccinfo->courseid);
+        array_push($coursecontextids, $ccinfo->contextid);
+        $coursecontextids = array_merge($coursecontextids, $coursecontext->get_parent_context_ids());
+    }
+
+    // Filter out duplicate contextids.
+    $coursecontextids = array_unique($coursecontextids);
+
+    list($contextidinsql, $params) = $DB->get_in_or_equal($coursecontextids, SQL_PARAMS_QM);
+    array_unshift($params, $USER->id);
+
+    $selectroles = '
+        SELECT ra.id, r.name, r.shortname, co.shortname as coursename
+            FROM {role_assignments} ra, {role} r, {context} c, {course} co
+            WHERE ra.userid = ?
+                AND ra.roleid = r.id
+                AND ra.contextid = c.id
+                AND c.instanceid = co.id
+                AND ra.contextid '.$contextidinsql;
+    $rolesinfo = $DB->get_records_sql($selectroles, $params);
+
+    foreach ($rolesinfo as $roleinfo) {
+        $rolename = $roleinfo->shortname;
+        if ($rolename == "admin" || $rolename == "coursecreator" || $rolename == "manager") {
+            $imsrole = "Instructor,Administrator";
+        } else if ($rolename == "editingteacher" || $rolename == "teacher") {
+            $imsrole = "Instructor";
+        } else {
+            $imsrole = "Learner";
+        }
+
+        $allenrollments[] = mediasite_get_mediasite_formatted_role($imsrole, $roleinfo->coursename);
+    }
+
     return $allenrollments;
 }
 

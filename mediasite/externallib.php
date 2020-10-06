@@ -68,14 +68,14 @@ class local_mediasite_external extends external_api {
         foreach ($groupmembers as $member) {
             array_push($members,
                 array(
-                    'groupId' => $member->groupid,
-                    'groupIdNumber' => $member->groupidnumber,
-                    'groupName' => $member->groupname,
-                    'userId' => $member->userid,
+                    'groupid' => $member->groupid,
+                    'groupidnumber' => $member->groupidnumber,
+                    'groupname' => $member->groupname,
+                    'userid' => $member->userid,
                     'username' => $member->username,
-                    'userEmail' => $member->useremail,
-                    'userFirstName' => $member->userfirstname,
-                    'userLastName' => $member->userlastname,
+                    'useremail' => $member->useremail,
+                    'userfirstname' => $member->userfirstname,
+                    'userlastname' => $member->userlastname,
                 ));
         }
 
@@ -90,14 +90,14 @@ class local_mediasite_external extends external_api {
         return new external_multiple_structure(
             new external_single_structure(
                 array(
-                    'groupId' => new external_value(PARAM_INT, 'group id'),
-                    'groupIdNumber' => new external_value(PARAM_TEXT, 'group id number'),
-                    'groupName' => new external_value(PARAM_TEXT, 'group name'),
-                    'userId' => new external_value(PARAM_INT, 'user id of the member'),
+                    'groupid' => new external_value(PARAM_INT, 'group id'),
+                    'groupidnumber' => new external_value(PARAM_TEXT, 'group id number'),
+                    'groupname' => new external_value(PARAM_TEXT, 'group name'),
+                    'userid' => new external_value(PARAM_INT, 'user id of the member'),
                     'username' => new external_value(PARAM_TEXT, 'username of the member'),
-                    'userEmail' => new external_value(PARAM_TEXT, 'email of the member'),
-                    'userFirstName' => new external_value(PARAM_TEXT, 'user first name'),
-                    'userLastName' => new external_value(PARAM_TEXT, 'user last name'),
+                    'useremail' => new external_value(PARAM_TEXT, 'email of the member'),
+                    'userfirstname' => new external_value(PARAM_TEXT, 'user first name'),
+                    'userlastname' => new external_value(PARAM_TEXT, 'user last name'),
                 )
             )
         );

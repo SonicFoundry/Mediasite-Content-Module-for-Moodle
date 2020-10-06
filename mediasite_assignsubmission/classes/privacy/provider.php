@@ -17,15 +17,25 @@
 /**
  * Mediasite plugin for Moodle.
  *
- * @package local_mediasite_courses
+ * @package assignsubmission_mediasite
  * @copyright Sonic Foundry 2017  {@link http://sonicfoundry.com}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace assignsubmission_mediasite\privacy;
 defined('MOODLE_INTERNAL') || die();
 
-$string['mediasite_courses'] = 'Mediasite 7 Courses';
-$string['modulename'] = 'Mediasite 7 Courses';
-$string['modulenameplural'] = 'Mediasite 7 Courses';
-$string['pluginname'] = 'Mediasite 7 Courses';
-$string['privacy:metadata'] = 'The Mediasite Courses plugin only displays existing Mediasite data.';
+class provider implements
+    // This plugin does not store any personal user data.
+    \core_privacy\local\metadata\null_provider {
+
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}

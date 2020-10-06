@@ -20,21 +20,9 @@ defined('MOODLE_INTERNAL') || die();
 $functions = array(
         'local_mediasite_getgroupmembership' => array(
                 'classname'   => 'local_mediasite_external',
-                'methodname'  => 'getGroupMembership',
-                'classpath'   => 'mod/mediasite/externallib.php',
-                'description' => 'Get all membership from a specific group.',
-                'type'        => 'read',
-                'ajax'        => true,
-                'classname'   => 'local_mediasite_external',
-                'methodname'  => 'getGroupMembership',
-                'classpath'   => 'mod/mediasite/externallib.php',
-                'description' => 'Get group membership for a specific group.',
-                'type'        => 'read',
-                'ajax'        => true,
-                'classname'   => 'local_mediasite_external',
                 'methodname'  => 'getgroupmembership',
                 'classpath'   => 'mod/mediasite/externallib.php',
-                'description' => 'Get all membership from a specific group.',
+                'description' => 'Get group membership for a specific group.',
                 'type'        => 'read',
                 'ajax'        => true
         )
@@ -45,11 +33,7 @@ $services = array(
         'Mediasite Group Membership Service' => array(
                 'functions'       => array('local_mediasite_getgroupmembership'),
                 'restrictedusers' => 0,
-                'enabled'         => 1,
-                'shortname'       => 'groupservice',
                 'enabled'         => 0,
-                'shortname'       => 'mod_mediasite_groupservice',
-                'enabled'         => 1,
                 'shortname'       => 'groupservice'
         )
 );

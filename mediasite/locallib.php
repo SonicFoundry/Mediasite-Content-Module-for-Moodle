@@ -57,6 +57,17 @@ function mediasite_is_atto_mediasitebutton_installed() {
     return false;
 }
 
+function mediasite_is_assign_submission_installed() {
+    // Extend settings for each local plugin. Note that their settings may be in any part of the
+    // settings tree and may be visible not only for administrators.
+    foreach (core_plugin_manager::instance()->get_plugins_of_type('assignsubmission') as $plugin) {
+        if (strcmp($plugin->component, 'assignsubmission_mediasite') === 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function mediasite_check_resource_permission($resourceid, $resourcetype, $username) {
     return true;
 }
@@ -97,32 +108,28 @@ function mediasite_has_capability_in_any_context($capability) {
     try {
         $usercontext = context_user::instance($USER->id);
         if (has_capability($capability, $usercontext)) {
-            blowup("The usercontext has the '".$capability."' capability.");
             return true;
         }
         if ($PAGE->category) {
             $categorycontext = context_coursecat::instance($PAGE->category->id);
             if (has_capability($capability, $categorycontext)) {
-                blowup("The categorycontext has the '".$capability."' capability.");
                 return true;
             }
         }
         if ($PAGE->course) {
             $coursecontext = context_course::instance($PAGE->course->id);
             if (has_capability($capability, $coursecontext)) {
-                blowup("The coursecontext has the '".$capability."' capability.");
                 return true;
             }
         }
         if ($PAGE->cm) {
             $contextmodule = context_module::instance($PAGE->cm->id);
             if (has_capability($capability, $contextmodule)) {
-                blowup("The contextmodule has the '".$capability."' capability.");
                 return true;
             }
         }
     } catch (Exception $e) {
-        blowup("mod_mediasite could not determine if the user has the '".$capability."' due to the following exception: "
+        debugging("mod_mediasite could not determine if the user has the '".$capability."' due to the following exception: "
                 .$e->getMessage());
         return false;
     }

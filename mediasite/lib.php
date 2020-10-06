@@ -42,19 +42,19 @@ function mediasite_supports($feature) {
         case FEATURE_COMPLETION_TRACKS_VIEWS:
             return true;
         case FEATURE_GRADE_HAS_GRADE:
-            return true;
+            return false;
+        case FEATURE_COMPLETION_HAS_RULES:
+            return false;
         case FEATURE_GRADE_OUTCOMES:
-            return true;
-        case FEATURE_GRADE_HAS_GRADE:
-            return true;
+            return false;
         case FEATURE_BACKUP_MOODLE2:
             return true;
         case FEATURE_SHOW_DESCRIPTION:
             return true;
         case FEATURE_ADVANCED_GRADING:
-            return true;
+            return false;
         case FEATURE_PLAGIARISM:
-            return true;
+            return false;
 
         default:
             return null;
@@ -100,9 +100,11 @@ function mediasite_get_coursemodule_info($coursemodule) {
 
     if ($mediasite = $DB->get_record('mediasite', array(
         'id' => $coursemodule->instance),
-        'id, course, name, description, resourceid, resourcetype, FROM_UNIXTIME(recorddateutc) AS recorddate, recorddateutc, '.
+        'id, course, name, description, resourceid, resourcetype, recorddateutc AS recorddate, recorddateutc, '.
         'presenters, LENGTH(LTRIM(RTRIM(presenters))) AS presenters_length, sofotags, '.
         'LENGTH(LTRIM(RTRIM(sofotags))) AS tags_length, displaymode, launchurl, siteid')) {
+
+        $mediasite->recorddate = date("Y-m-d H:i:s", $mediasite->recorddate);
 
         if ($lti = $DB->get_record('mediasite_sites', array('id' => $mediasite->siteid))) {
             // On upgrade, the lti consumer key must be set to allow a successful post. Only show this if the config is valid.
@@ -318,7 +320,8 @@ function generate_mediasite_iframe($mediasite, $coursemodule) {
     $content = html_writer::tag('iframe', null, array(
         'id' => 'mod-mediasite-view-'.$coursemodule->id,
         'class' => $css,
-        'src' => $url)
+        'src' => $url,
+        'allowfullscreen' => 'allowfullscreen')
     );
     return $content;
 }
